@@ -1,0 +1,16 @@
+{
+  "id": "lesson3",
+  "title": "Travel",
+  "targetLanguage": "ja",
+  "acceptRomanization": true,
+  "vocabulary": [
+    { "id": "train", "targetWord": "でんしゃ", "romanization": "densha", "englishMeaning": "Train", "image": "/vocab/train.svg", "audio": null, "difficulty": 1 },
+    { "id": "airport", "targetWord": "くうこう", "romanization": "kuukou", "englishMeaning": "Airport", "image": "/vocab/airport.svg", "audio": null, "difficulty": 1 },
+    { "id": "ticket", "targetWord": "きっぷ", "romanization": "kippu", "englishMeaning": "Ticket", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "hotel", "targetWord": "ホテル", "romanization": "hoteru", "englishMeaning": "Hotel", "image": "/vocab/hotel.svg", "audio": null, "difficulty": 1 }
+  ],
+  "imageDistractors": [
+    { "label": "Car", "image": "/vocab/car.svg" },
+    { "label": "House", "image": "/vocab/house.svg" }
+  ]
+}

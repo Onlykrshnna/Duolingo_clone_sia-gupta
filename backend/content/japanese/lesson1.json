@@ -1,0 +1,41 @@
+{
+  "id": "lesson1",
+  "title": "Greetings",
+  "targetLanguage": "ja",
+  "acceptRomanization": true,
+  "vocabulary": [
+    {
+      "id": "hello",
+      "english": "Hello",
+      "target": "こんにちは",
+      "romanization": "Konnichiwa",
+      "pronunciation": "kon-ni-chi-wa",
+      "image": "/vocab/hello.svg",
+      "audio": null,
+      "exampleSentence": "こんにちは！",
+      "difficulty": 1
+    },
+    {
+      "id": "thank_you",
+      "english": "Thank you",
+      "target": "ありがとう",
+      "romanization": "Arigatou",
+      "pronunciation": "a-ri-ga-tou",
+      "image": "/vocab/thanks.svg",
+      "audio": null,
+      "exampleSentence": "ありがとう！",
+      "difficulty": 1
+    },
+    {
+      "id": "goodbye",
+      "english": "Goodbye",
+      "target": "さようなら",
+      "romanization": "Sayounara",
+      "pronunciation": "sa-yo-u-na-ra",
+      "image": "/vocab/bye.svg",
+      "audio": null,
+      "exampleSentence": "さようなら！",
+      "difficulty": 1
+    }
+  ]
+}

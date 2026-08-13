@@ -1,0 +1,59 @@
+{
+  "id": "unit1",
+  "title": "Unit 1: Basics",
+  "targetLanguage": "ja",
+  "acceptRomanization": true,
+  "vocabulary": [
+    { "id": "hello", "english": "Hello", "target": "こんにちは", "romanization": "Konnichiwa", "category": "greetings", "image": "/vocab/hello.svg" },
+    { "id": "good_morning", "english": "Good morning", "target": "おはよう", "romanization": "Ohayou", "category": "greetings", "image": null },
+    { "id": "good_afternoon", "english": "Good afternoon", "target": "こんにちは", "romanization": "Konnichiwa", "category": "greetings", "image": null },
+    { "id": "good_evening", "english": "Good evening", "target": "こんばんは", "romanization": "Konbanwa", "category": "greetings", "image": null },
+    { "id": "goodbye", "english": "Goodbye", "target": "さようなら", "romanization": "Sayounara", "category": "greetings", "image": "/vocab/bye.svg" },
+    { "id": "see_you_later", "english": "See you later", "target": "またね", "romanization": "Matane", "category": "greetings", "image": null },
+    { "id": "please", "english": "Please", "target": "ください", "romanization": "Kudasai", "category": "greetings", "image": null },
+    { "id": "thank_you", "english": "Thank you", "target": "ありがとう", "romanization": "Arigatou", "category": "greetings", "image": "/vocab/thanks.svg" },
+    { "id": "youre_welcome", "english": "You're welcome", "target": "どういたしまして", "romanization": "Douitashimashite", "category": "greetings", "image": null },
+    { "id": "sorry", "english": "Sorry", "target": "ごめんなさい", "romanization": "Gomennasai", "category": "greetings", "image": null },
+    { "id": "yes", "english": "Yes", "target": "はい", "romanization": "Hai", "category": "daily_life", "image": null },
+    { "id": "no", "english": "No", "target": "いいえ", "romanization": "Iie", "category": "daily_life", "image": null },
+    { "id": "maybe", "english": "Maybe", "target": "たぶん", "romanization": "Tabun", "category": "daily_life", "image": null },
+    { "id": "today", "english": "Today", "target": "きょう", "romanization": "Kyou", "category": "daily_life", "image": null },
+    { "id": "tomorrow", "english": "Tomorrow", "target": "あした", "romanization": "Ashita", "category": "daily_life", "image": null },
+    { "id": "water", "english": "Water", "target": "みず", "romanization": "Mizu", "category": "food", "image": "/vocab/water.svg" },
+    { "id": "tea", "english": "Tea", "target": "おちゃ", "romanization": "Ocha", "category": "food", "image": "/vocab/tea.svg" },
+    { "id": "coffee", "english": "Coffee", "target": "コーヒー", "romanization": "Koohii", "category": "food", "image": "/vocab/coffee.svg" },
+    { "id": "rice", "english": "Rice", "target": "ごはん", "romanization": "Gohan", "category": "food", "image": "/vocab/rice.svg" },
+    { "id": "bread", "english": "Bread", "target": "パン", "romanization": "Pan", "category": "food", "image": "/vocab/bread.svg" },
+    { "id": "milk", "english": "Milk", "target": "ぎゅうにゅう", "romanization": "Gyuunyuu", "category": "food", "image": null },
+    { "id": "apple", "english": "Apple", "target": "りんご", "romanization": "Ringo", "category": "food", "image": null },
+    { "id": "friend", "english": "Friend", "target": "ともだち", "romanization": "Tomodachi", "category": "people", "image": null },
+    { "id": "teacher", "english": "Teacher", "target": "せんせい", "romanization": "Sensei", "category": "people", "image": null },
+    { "id": "student", "english": "Student", "target": "がくせい", "romanization": "Gakusei", "category": "people", "image": null },
+    { "id": "mother", "english": "Mother", "target": "はは", "romanization": "Haha", "category": "family", "image": null },
+    { "id": "father", "english": "Father", "target": "ちち", "romanization": "Chichi", "category": "family", "image": null },
+    { "id": "train", "english": "Train", "target": "でんしゃ", "romanization": "Densha", "category": "travel", "image": null },
+    { "id": "bus", "english": "Bus", "target": "バス", "romanization": "Basu", "category": "travel", "image": null },
+    { "id": "ticket", "english": "Ticket", "target": "きっぷ", "romanization": "Kippu", "category": "travel", "image": null },
+    { "id": "money", "english": "Money", "target": "おかね", "romanization": "Okane", "category": "shopping", "image": null },
+    { "id": "price", "english": "Price", "target": "ねだん", "romanization": "Nedan", "category": "shopping", "image": null },
+    { "id": "left", "english": "Left", "target": "ひだり", "romanization": "Hidari", "category": "directions", "image": null },
+    { "id": "right", "english": "Right", "target": "みぎ", "romanization": "Migi", "category": "directions", "image": null },
+    { "id": "straight", "english": "Straight", "target": "まっすぐ", "romanization": "Massugu", "category": "directions", "image": null }
+  ],
+  "lessonSlices": {
+    "greetings": ["hello", "good_morning", "good_evening", "goodbye", "see_you_later", "please", "thank_you", "youre_welcome", "yes", "no"],
+    "food": ["water", "tea", "coffee", "rice", "bread", "milk", "apple", "please", "thank_you", "sorry"],
+    "travel": ["train", "bus", "ticket", "please", "sorry", "thank_you", "goodbye", "hello", "yes", "no"],
+    "family": ["mother", "father", "friend", "teacher", "student", "hello", "thank_you", "yes", "no", "sorry"],
+    "shopping": ["money", "price", "bread", "water", "coffee", "please", "thank_you", "yes", "no", "sorry"],
+    "directions": ["left", "right", "straight", "train", "bus", "ticket", "please", "thank_you", "hello", "goodbye"]
+  },
+  "sentenceDrills": [
+    {
+      "id": "i_am_student",
+      "prompt": "Arrange the sentence:\n\nI am a student",
+      "tokens": ["です", "学生", "私は", "がくせい", "は"],
+      "words": ["私は", "学生", "です"]
+    }
+  ]
+}

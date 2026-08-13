@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+:root {
+  --background: #131F24;
+  --foreground: #F3F4F6;
+}
+
+@theme {
+  --font-sans: var(--font-nunito), Arial, sans-serif;
+  
+  /* Color Palette Tokens */
+  --color-brand-green: #58CC02;
+  --color-brand-green-border: #46A302;
+  --color-sky-blue: #38BDF8;
+  --color-sky-blue-border: #0EA5E9;
+  --color-rose-red: #F43F5E;
+  --color-rose-red-border: #E11D48;
+  --color-brand-orange: #FB923C;
+  --color-brand-indigo: #6366F1;
+  --color-brand-indigo-border: #4F46E5;
+  
+  /* Muted / Border Colors */
+  --color-muted-text: #8E9FA8;
+  --color-light-border: #37464F;
+  --color-muted-base: #4E606A;
+  --color-dark-card-bg: #1F2E35;
+  
+  /* Locked States */
+  --color-locked-bg: #202F36;
+  --color-locked-border: #37464F;
+  
+  /* Custom Border Radius (PRD Specs) */
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-md: 6px;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nunito), sans-serif;
+}
+
+input::selection,
+textarea::selection {
+  background: rgba(28, 176, 246, 0.35);
+  color: #ffffff;
+}
+
+/* Shake animation for wrong answer hearts decrement */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px) rotate(-2deg); }
+  30% { transform: translateX(6px) rotate(2deg); }
+  45% { transform: translateX(-5px) rotate(-1deg); }
+  60% { transform: translateX(5px) rotate(1deg); }
+  75% { transform: translateX(-3px); }
+  90% { transform: translateX(3px); }
+}
+
+.animate-shake {
+  animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes path-glow {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.05); }
+}
+
+.animate-path-glow {
+  animation: path-glow 2.4s ease-in-out infinite;
+}
+
+/* Learning path zig-zag — responsive offsets, no connector SVG */
+.learning-path-nodes {
+  --path-offset: clamp(1.25rem, 5vw, 2.5rem);
+  --path-node-gap: clamp(2.25rem, 4.5vh, 3.5rem);
+}
+
+@media (min-width: 1024px) {
+  .learning-path-nodes {
+    --path-offset: 2.5rem;
+    --path-node-gap: 3.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .learning-path-nodes {
+    --path-offset: clamp(1rem, 4vw, 1.75rem);
+    --path-node-gap: 2rem;
+  }
+}

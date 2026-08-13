@@ -1,0 +1,13 @@
+{
+  "id": "lesson3",
+  "title": "Travel",
+  "targetLanguage": "de",
+  "acceptRomanization": false,
+  "vocabulary": [
+    { "id": "train", "targetWord": "Zug", "romanization": "zug", "englishMeaning": "Train", "image": "/vocab/train.svg", "audio": null, "difficulty": 1 },
+    { "id": "airport", "targetWord": "Flughafen", "romanization": "flughafen", "englishMeaning": "Airport", "image": "/vocab/airport.svg", "audio": null, "difficulty": 1 },
+    { "id": "ticket", "targetWord": "Ticket", "romanization": "ticket", "englishMeaning": "Ticket", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "hotel", "targetWord": "Hotel", "romanization": "hotel", "englishMeaning": "Hotel", "image": "/vocab/hotel.svg", "audio": null, "difficulty": 1 }
+  ],
+  "imageDistractors": [{ "label": "Car", "image": "/vocab/car.svg" }]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "lesson2",
+  "title": "Food",
+  "targetLanguage": "de",
+  "acceptRomanization": false,
+  "vocabulary": [
+    { "id": "rice", "english": "Rice", "target": "Reis", "romanization": "Reis", "image": "/vocab/rice.svg", "audio": null, "difficulty": 1 },
+    { "id": "tea", "english": "Tea", "target": "Tee", "romanization": "Tee", "image": "/vocab/tea.svg", "audio": null, "difficulty": 1 },
+    { "id": "water", "english": "Water", "target": "Wasser", "romanization": "Wasser", "image": "/vocab/water.svg", "audio": null, "difficulty": 1 }
+  ]
+}

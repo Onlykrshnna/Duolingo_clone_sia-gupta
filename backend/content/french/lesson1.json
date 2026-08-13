@@ -1,0 +1,11 @@
+{
+  "id": "lesson1",
+  "title": "Greetings",
+  "targetLanguage": "fr",
+  "acceptRomanization": false,
+  "vocabulary": [
+    { "id": "hello", "english": "Hello", "target": "Bonjour", "romanization": "Bonjour", "pronunciation": "bon-zhoor", "image": "/vocab/hello.svg", "audio": null, "difficulty": 1 },
+    { "id": "thank_you", "english": "Thank you", "target": "Merci", "romanization": "Merci", "pronunciation": "mehr-see", "image": "/vocab/thanks.svg", "audio": null, "difficulty": 1 },
+    { "id": "goodbye", "english": "Goodbye", "target": "Au revoir", "romanization": "Au revoir", "pronunciation": "oh ruh-vwar", "image": "/vocab/bye.svg", "audio": null, "difficulty": 1 }
+  ]
+}

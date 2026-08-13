@@ -1,0 +1,11 @@
+{
+  "id": "lesson1",
+  "title": "Greetings",
+  "targetLanguage": "es",
+  "acceptRomanization": false,
+  "vocabulary": [
+    { "id": "hello", "english": "Hello", "target": "Hola", "romanization": "Hola", "image": "/vocab/hello.svg", "audio": null, "difficulty": 1 },
+    { "id": "thank_you", "english": "Thank you", "target": "Gracias", "romanization": "Gracias", "image": "/vocab/thanks.svg", "audio": null, "difficulty": 1 },
+    { "id": "goodbye", "english": "Goodbye", "target": "Adiós", "romanization": "Adios", "image": "/vocab/bye.svg", "audio": null, "difficulty": 1 }
+  ]
+}

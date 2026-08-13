@@ -1,0 +1,35 @@
+{
+  "id": "lesson2",
+  "title": "Food",
+  "targetLanguage": "ja",
+  "acceptRomanization": true,
+  "vocabulary": [
+    {
+      "id": "rice",
+      "english": "Rice",
+      "target": "ごはん",
+      "romanization": "Gohan",
+      "image": "/vocab/rice.svg",
+      "audio": null,
+      "difficulty": 1
+    },
+    {
+      "id": "tea",
+      "english": "Tea",
+      "target": "おちゃ",
+      "romanization": "Ocha",
+      "image": "/vocab/tea.svg",
+      "audio": null,
+      "difficulty": 1
+    },
+    {
+      "id": "water",
+      "english": "Water",
+      "target": "みず",
+      "romanization": "Mizu",
+      "image": "/vocab/water.svg",
+      "audio": null,
+      "difficulty": 1
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "lesson4",
+  "title": "Family",
+  "targetLanguage": "fr",
+  "acceptRomanization": false,
+  "vocabulary": [
+    { "id": "mother", "targetWord": "Mère", "romanization": "mere", "englishMeaning": "Mother", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "father", "targetWord": "Père", "romanization": "pere", "englishMeaning": "Father", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "brother", "targetWord": "Frère", "romanization": "frere", "englishMeaning": "Brother", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "family", "targetWord": "Famille", "romanization": "famille", "englishMeaning": "Family", "image": null, "audio": null, "difficulty": 1 }
+  ],
+  "imageDistractors": []
+}

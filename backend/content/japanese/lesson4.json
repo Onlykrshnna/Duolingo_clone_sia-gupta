@@ -1,0 +1,13 @@
+{
+  "id": "lesson4",
+  "title": "Family",
+  "targetLanguage": "ja",
+  "acceptRomanization": true,
+  "vocabulary": [
+    { "id": "mother", "targetWord": "おかあさん", "romanization": "okaasan", "englishMeaning": "Mother", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "father", "targetWord": "おとうさん", "romanization": "otousan", "englishMeaning": "Father", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "brother", "targetWord": "あに", "romanization": "ani", "englishMeaning": "Brother", "image": null, "audio": null, "difficulty": 1 },
+    { "id": "family", "targetWord": "かぞく", "romanization": "kazoku", "englishMeaning": "Family", "image": null, "audio": null, "difficulty": 1 }
+  ],
+  "imageDistractors": []
+}
