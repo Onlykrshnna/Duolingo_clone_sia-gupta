@@ -10,12 +10,10 @@ from models import (
     User, UserStats, UserSkillProgress, UserLessonAttempt, UserAchievement,
     LeaderboardEntry,
     Achievement, Quest, UserQuestProgress, UserCourse,
-    WritingSystem, Character, CharacterProgress, CharacterReview,
 )
 from lesson_generator import load_lesson_content, persist_generated_lesson
 from language_registry import get_flag_asset
 from course_utils import enroll_user_course
-from seed_writing import seed_all_writing_systems
 
 SKILL_CONTENT_KEY = {
     "Greetings": "greetings",
@@ -110,10 +108,6 @@ async def seed_data():
         await session.execute(delete(UserAchievement))
         await session.execute(delete(Quest))
         await session.execute(delete(LeaderboardEntry))
-        await session.execute(delete(CharacterReview))
-        await session.execute(delete(CharacterProgress))
-        await session.execute(delete(Character))
-        await session.execute(delete(WritingSystem))
         await session.execute(delete(UserStats))
         await session.execute(delete(UserSkillProgress))
         await session.execute(delete(UserCourse))
@@ -401,9 +395,6 @@ async def seed_data():
                     created_at=datetime.now(timezone.utc).replace(tzinfo=None),
                 )
             )
-
-        print("Seeding writing systems...")
-        seed_all_writing_systems(session)
 
         # 7. Seed Default Learner User
         print("Seeding Default Learner User...")

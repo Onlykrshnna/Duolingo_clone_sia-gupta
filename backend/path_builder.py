@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Lesson, Skill, SkillProgressStatus, Unit, UserSkillProgress
 from progress_utils import pick_best_progress
-from writing_utils import is_primary_writing_complete
 
 
 async def build_course_path(
@@ -59,8 +58,6 @@ async def build_course_path(
 
     is_previous_completed = True
     skills_progress_response: dict[uuid.UUID, dict] = {}
-    writing_complete = await is_primary_writing_complete(db, user_id, course_id)
-    first_skill_id = ordered_skills[0].id if ordered_skills else None
 
     for skill in ordered_skills:
         prog = progress_map.get(skill.id)
@@ -75,9 +72,6 @@ async def build_course_path(
             current_level = 0
             lessons_completed = 0
             is_previous_completed = False
-
-        if not writing_complete and skill.id == first_skill_id:
-            status = "locked"
 
         next_lesson_id = lesson_map.get((skill.id, current_level + 1, lessons_completed + 1))
         if not next_lesson_id:

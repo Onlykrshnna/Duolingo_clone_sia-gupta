@@ -21,9 +21,6 @@ import { useCourseStore } from "@/store/useCourseStore";
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchWritingSystemForCourse } from "@/lib/fetchWritingSystem";
-import WritingSystemCard from "@/components/writing/WritingSystemCard";
-import { WritingSystemOverview } from "@/lib/types";
 
 export default function Home() {
   const router = useSafeRouter();
@@ -44,24 +41,16 @@ export default function Home() {
   const [initializing, setInitializing] = useState(true);
   const [loadingPath, setLoadingPath] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [writingOverview, setWritingOverview] = useState<WritingSystemOverview | null>(null);
-  const [loadingWriting, setLoadingWriting] = useState(false);
-  const [writingUnavailable, setWritingUnavailable] = useState(false);
 
   const loadCourseData = useCallback(
     async (courseId: string) => {
       if (!isValidCourseId(courseId)) {
         setLoadingPath(false);
-        setLoadingWriting(false);
-        setWritingOverview(null);
-        setWritingUnavailable(true);
         return;
       }
 
       setLoadingPath(true);
       setError(null);
-      setWritingOverview(null);
-      setWritingUnavailable(false);
 
       const [userStats, coursePath, questsData] = await Promise.all([
         api.getUserStats("me"),
@@ -73,19 +62,7 @@ export default function Home() {
       setPathData(coursePath);
       setActiveCourseId(courseId);
       setQuestsProgress(questsData);
-
-      setLoadingWriting(true);
-      try {
-        const { overview, unavailable } = await fetchWritingSystemForCourse(courseId);
-        setWritingOverview(overview);
-        setWritingUnavailable(unavailable);
-      } catch {
-        setWritingOverview(null);
-        setWritingUnavailable(false);
-      } finally {
-        setLoadingWriting(false);
-        setLoadingPath(false);
-      }
+      setLoadingPath(false);
     },
     [setPathData, setStats, setActiveCourseId]
   );
@@ -144,17 +121,6 @@ export default function Home() {
       const questsData = await api.getUserQuests("me");
       setQuestsProgress(questsData);
       await loadEnrolledCourses();
-      setLoadingWriting(true);
-      try {
-        const { overview, unavailable } = await fetchWritingSystemForCourse(activeCourseId);
-        setWritingOverview(overview);
-        setWritingUnavailable(unavailable);
-      } catch {
-        setWritingOverview(null);
-        setWritingUnavailable(false);
-      } finally {
-        setLoadingWriting(false);
-      }
     } catch (err: unknown) {
       console.error(err);
       setError("Could not reload learning path data.");
@@ -174,8 +140,6 @@ export default function Home() {
     if (!isValidCourseId(activeCourseId) || initializing) return;
     if (prevCourseRef.current === activeCourseId) return;
     if (prevCourseRef.current !== null) {
-      setWritingOverview(null);
-      setWritingUnavailable(false);
       setQuestsProgress([]);
       setError(null);
       void loadCourseData(activeCourseId);
@@ -185,9 +149,7 @@ export default function Home() {
 
   useEffect(() => {
     if (switching) {
-      setWritingOverview(null);
       setQuestsProgress([]);
-      setWritingUnavailable(false);
     }
   }, [switching]);
 
@@ -279,17 +241,6 @@ export default function Home() {
           transition={{ duration: 0.25 }}
           className="w-full flex flex-col items-center overflow-x-hidden"
         >
-          {activeCourseId && activeCourse && (
-            <WritingSystemCard
-              courseId={activeCourseId}
-              languageName={activeCourse.language_name}
-              flagIcon={activeCourse.flag}
-              overview={writingOverview}
-              loading={loadingWriting}
-              unavailable={writingUnavailable}
-            />
-          )}
-
           {pathData.units.map((unit, uIdx) => (
             <div key={unit.id} className="w-full flex flex-col items-center mb-16 max-w-[600px] relative">
               <UnitBanner
@@ -411,12 +362,14 @@ export default function Home() {
                       className="w-[84px] h-[84px] object-contain rounded-xl shrink-0"
                     />
                   </div>
-                  <DuoButton
-                    variant="super"
-                    className="w-full mt-4 rounded-2xl py-3 text-[11px] uppercase font-extrabold tracking-[0.1em] bg-gradient-to-r from-[#1CB0F6] to-[#6366F1] hover:from-[#38bdf8] hover:to-[#818cf8] border-none text-white shadow-[0_4px_0_#0c4a6e]"
-                  >
-                    TRY 1 WEEK FREE
-                  </DuoButton>
+                  <Link href="/super" className="block w-full mt-4">
+                    <DuoButton
+                      variant="super"
+                      className="w-full rounded-2xl py-3 text-[11px] uppercase font-extrabold tracking-[0.1em] bg-gradient-to-r from-[#1CB0F6] to-[#6366F1] hover:from-[#38bdf8] hover:to-[#818cf8] border-none text-white shadow-[0_4px_0_#0c4a6e]"
+                    >
+                      TRY 1 WEEK FREE
+                    </DuoButton>
+                  </Link>
                 </RightRailCard>
 
                 <RightRailCard>

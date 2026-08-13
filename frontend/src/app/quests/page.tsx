@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { UserStats, UserQuestProgress } from "@/lib/types";
 import { Clock, Lock, RefreshCw } from "lucide-react";
 import DuoButton from "@/components/DuoButton";
+import { HoverCard } from "@/components/interactions";
 
 // Purple Welcome Banner Duo Owl & Treasure Chest Graphic
 const WelcomeBannerGraphic = () => (
@@ -109,27 +110,29 @@ export default function QuestsPage() {
     );
   }
 
-  // Active quest (Earn 10 XP / Earn 20 XP)
-  const activeQuest = questsProgress.length > 0 ? questsProgress[0] : null;
-  const currentProgress = activeQuest ? activeQuest.progress : 0;
-  const targetXp = 10;
+  // Active XP quest from API (seeded target is 20 XP)
+  const activeQuest =
+    questsProgress.find((q) => q.quest.quest_type === "xp") ?? questsProgress[0] ?? null;
+  const currentProgress = activeQuest?.progress ?? 0;
+  const targetXp = activeQuest?.quest.xp_target ?? 20;
+  const questTitle = activeQuest?.quest.title ?? "Earn XP";
   const percent = Math.min(100, Math.round((currentProgress / targetXp) * 100));
 
   return (
-    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6]">
+    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6] max-lg:min-h-[100dvh] max-lg:overflow-x-clip">
       {/* Sidebar Navigation */}
       <Sidebar />
       
       {/* Main Container */}
-      <div className="flex-1 flex flex-col lg:pl-[256px]">
+      <div className="flex-1 flex flex-col lg:pl-[256px] min-w-0 max-lg:overflow-x-clip">
         {/* Mobile top spacer */}
         <div className="h-[50px] lg:hidden w-full" />
         
         {/* Content Layout */}
-        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-10 items-start">
+        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-10 items-start min-w-0 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]">
           
           {/* Main Center Feed Column */}
-          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col space-y-6">
+          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col space-y-6 min-w-0">
             
             {/* 1. Purple Welcome Banner */}
             <div className="bg-[#7952B3] text-white rounded-3xl p-6 sm:p-7 flex items-center justify-between shadow-md relative overflow-hidden select-none">
@@ -159,14 +162,14 @@ export default function QuestsPage() {
             <div className="flex flex-col gap-4">
               
               {/* Card 1: Earn 10 XP */}
-              <div className="border-2 border-[#37464F] bg-[#131F24] rounded-2xl p-5 flex items-center gap-4 text-left shadow-sm">
-                <div className="text-3xl text-amber-400 shrink-0 select-none animate-pulse">
+              <HoverCard className="border-2 border-[#37464F] bg-[#131F24] rounded-2xl p-5 flex items-center gap-4 text-left shadow-sm hover:border-[#4E606A] hover:shadow-[0_0_16px_rgba(255,200,0,0.12)] group">
+                <div className="text-3xl text-amber-400 shrink-0 select-none transition-transform duration-[170ms] group-hover:scale-110 group-hover:rotate-6">
                   ⚡
                 </div>
 
                 <div className="flex-1 flex flex-col gap-2">
                   <h3 className="font-extrabold text-slate-100 text-sm font-nunito leading-tight">
-                    Earn 10 XP
+                    {questTitle}
                   </h3>
 
                   {/* Dark progress bar container with chest icon at end */}
@@ -174,7 +177,7 @@ export default function QuestsPage() {
                     <div className="flex-1 h-5 bg-[#202F36] rounded-full border border-[#37464F] relative overflow-hidden flex items-center">
                       <div
                         style={{ width: `${percent}%` }}
-                        className="h-full bg-[#FF9600] rounded-full transition-all duration-300"
+                        className="h-full bg-[#FF9600] rounded-full transition-all duration-300 group-hover:brightness-110"
                       />
                       <span className="absolute inset-0 flex items-center justify-center text-[11px] font-black text-slate-300 font-nunito tracking-wider z-10">
                         {currentProgress} / {targetXp}
@@ -182,12 +185,12 @@ export default function QuestsPage() {
                     </div>
 
                     {/* Right end wooden chest icon */}
-                    <div className="text-xl shrink-0 select-none">
+                    <div className="text-xl shrink-0 select-none transition-transform duration-[170ms] group-hover:rotate-12">
                       📦
                     </div>
                   </div>
                 </div>
-              </div>
+              </HoverCard>
 
               {/* Card 2: More quests unlock soon */}
               <div className="border-2 border-[#37464F] bg-[#131F24] rounded-2xl p-5 flex items-center gap-4 text-left shadow-sm opacity-80">

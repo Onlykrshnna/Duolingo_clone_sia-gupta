@@ -69,6 +69,13 @@ class WordProgressionBuilder:
             "phase": phase,
             "stage": stage,
             "vocabulary_id": self.word["id"],
+            "source_text": self.word["english"],
+            "target_text": self.word["target"],
+            "englishMeaning": self.word["english"],
+            "targetWord": self.word["target"],
+            "romanization": self.word.get("romanization", ""),
+            "pronunciation": self.word.get("pronunciation") or self.word.get("romanization", ""),
+            "targetLanguage": self.target_lang,
         }
 
     def _intro(self) -> dict:
@@ -206,7 +213,8 @@ class WordProgressionBuilder:
                 "fallback_text": self.word["target"] if not self.word.get("audio") else None,
                 "pronunciation": self.word["pronunciation"],
                 "romanization": self.word["romanization"],
-                "englishMeaning": None,
+                "englishMeaning": self.word["english"],
+                "targetWord": self.word["target"],
             },
             "options": [{"label": o, "is_correct": o == self.word["english"]} for o in options],
         }

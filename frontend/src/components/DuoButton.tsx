@@ -3,8 +3,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { playSound } from "@/lib/sounds";
-import { usePreferencesStore } from "@/store/usePreferencesStore";
-import { easeOutFast } from "@/lib/animations";
+import { useInteractionMotion } from "@/components/interactions";
+import { hoverLift, interactionEase, tapPress } from "@/lib/interactions";
 
 export type DuoButtonVariant =
   | "primary"
@@ -26,7 +26,7 @@ export const DuoButton: React.FC<DuoButtonProps> = ({
   onClick,
   ...props
 }) => {
-  const animationsEnabled = usePreferencesStore((s) => s.animationsEnabled);
+  const { enabled: motionEnabled } = useInteractionMotion();
   const activeVariant = disabled ? "locked" : variant;
   const isInteractive = !disabled && activeVariant !== "locked";
 
@@ -68,13 +68,13 @@ export const DuoButton: React.FC<DuoButtonProps> = ({
     </button>
   );
 
-  if (animationsEnabled && isInteractive) {
+  if (motionEnabled && isInteractive) {
     return (
       <motion.div
         className="inline-flex w-full"
-        whileHover={{ scale: 1.03, y: -1 }}
-        whileTap={{ scale: 0.96, y: 2 }}
-        transition={easeOutFast}
+        whileHover={{ ...hoverLift, y: -2 }}
+        whileTap={{ ...tapPress, y: 2 }}
+        transition={interactionEase}
       >
         {button}
       </motion.div>

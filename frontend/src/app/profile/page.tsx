@@ -9,6 +9,7 @@ import { UserProfile } from "@/lib/types";
 import { getLanguageName } from "@/lib/languages";
 import { Pencil, ChevronRight, RefreshCw } from "lucide-react";
 import DuoButton from "@/components/DuoButton";
+import { HoverCard, InteractivePressable } from "@/components/interactions";
 import LanguageFlag from "@/components/LanguageFlag";
 
 // Header Avatar Silhouette Graphic with plus icon
@@ -123,31 +124,33 @@ export default function ProfilePage() {
   const lockedAchievements = achievements.filter((a) => !a.unlocked);
 
   return (
-    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6]">
+    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6] max-lg:min-h-[100dvh] max-lg:overflow-x-clip">
       {/* Sidebar Navigation */}
       <Sidebar />
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col lg:pl-[256px]">
+      <div className="flex-1 flex flex-col lg:pl-[256px] min-w-0 max-lg:overflow-x-clip">
         {/* Mobile top spacer */}
         <div className="h-[50px] lg:hidden w-full" />
 
         {/* Content Layout */}
-        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-10 items-start">
+        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-10 items-start min-w-0 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]">
           
           {/* Main Feed: Header, Stats, Achievements */}
-          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col">
+          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col min-w-0">
             
             {/* 1. Header User Card Banner */}
-            <div className="border-2 border-[#37464F] bg-[#1F2E35] rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center relative shadow-sm mb-6 select-none">
+            <HoverCard interactive className="border-2 border-[#37464F] bg-[#1F2E35] rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center relative shadow-sm mb-6 select-none group">
               
               {/* Top right pencil edit icon */}
-              <button className="w-8 h-8 rounded-xl bg-[#202F36] border border-[#37464F] flex items-center justify-center text-slate-300 hover:bg-[#2A3B43] transition cursor-pointer absolute top-4 right-4">
+              <button className="w-8 h-8 rounded-xl bg-[#202F36] border border-[#37464F] flex items-center justify-center text-slate-300 hover:bg-[#2A3B43] hover:border-[#4E606A] hover:-translate-y-0.5 transition-all duration-[170ms] cursor-pointer absolute top-4 right-4 opacity-80 group-hover:opacity-100">
                 <Pencil className="w-4 h-4 text-slate-300" />
               </button>
 
               {/* Avatar Silhouette */}
-              <AvatarSilhouetteGraphic />
+              <InteractivePressable className="rounded-full">
+                <AvatarSilhouetteGraphic />
+              </InteractivePressable>
 
               {/* User details */}
               <div className="mt-4 flex flex-col items-center w-full">
@@ -196,9 +199,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-            </div>
-
-            {/* 2. Statistics Grid Section */}
+            </HoverCard>
             <h2 className="text-xl font-extrabold text-slate-100 font-nunito tracking-tight mb-4 text-left">
               Statistics
             </h2>
@@ -206,7 +207,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-4 mb-8">
               
               {/* Day Streak */}
-              <div className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm">
+              <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm hover:border-[#4E606A]">
                 <div className="text-2xl text-slate-500 shrink-0 select-none">
                   🔥
                 </div>
@@ -218,10 +219,10 @@ export default function ProfilePage() {
                     Day streak
                   </span>
                 </div>
-              </div>
+              </HoverCard>
 
               {/* Total XP */}
-              <div className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm">
+              <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm hover:border-[#4E606A]">
                 <div className="text-2xl text-amber-400 shrink-0 select-none">
                   ⚡
                 </div>
@@ -233,10 +234,10 @@ export default function ProfilePage() {
                     Total XP
                   </span>
                 </div>
-              </div>
+              </HoverCard>
 
               {/* Longest Streak */}
-              <div className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm">
+              <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm hover:border-[#4E606A]">
                 <div className="text-2xl text-orange-400 shrink-0 select-none">
                   🏆
                 </div>
@@ -248,10 +249,10 @@ export default function ProfilePage() {
                     Longest streak
                   </span>
                 </div>
-              </div>
+              </HoverCard>
 
               {/* Current League */}
-              <div className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm">
+              <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm hover:border-[#4E606A]">
                 <div className="text-2xl text-slate-500 shrink-0 select-none">
                   🛡️
                 </div>
@@ -263,10 +264,10 @@ export default function ProfilePage() {
                     Current league
                   </span>
                 </div>
-              </div>
+              </HoverCard>
 
               {/* Top 3 Finishes */}
-              <div className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm">
+              <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-4 rounded-2xl flex items-center gap-3 text-left shadow-sm hover:border-[#4E606A]">
                 <div className="text-2xl text-slate-500 shrink-0 select-none">
                   🏅
                 </div>
@@ -278,7 +279,7 @@ export default function ProfilePage() {
                     Top 3 finishes
                   </span>
                 </div>
-              </div>
+              </HoverCard>
 
             </div>
 
@@ -299,7 +300,7 @@ export default function ProfilePage() {
                 </p>
               ) : (
                 achievements.map((achievement) => (
-                  <div
+                  <InteractivePressable
                     key={achievement.id}
                     className={`p-4 flex items-center gap-4 ${
                       achievement.unlocked ? "bg-[#1CB0F6]/5" : ""
@@ -335,7 +336,7 @@ export default function ProfilePage() {
                         {achievement.description}
                       </p>
                     </div>
-                  </div>
+                  </InteractivePressable>
                 ))
               )}
             </div>

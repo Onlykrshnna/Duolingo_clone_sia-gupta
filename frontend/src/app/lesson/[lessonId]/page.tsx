@@ -25,6 +25,7 @@ import ExerciseSkipButton from "@/components/exercises/ExerciseSkipButton";
 import InvalidExercisePanel from "@/components/exercises/InvalidExercisePanel";
 import { normalizeExercise } from "@/lib/exerciseUtils";
 import { isExerciseValid, validateExercise } from "@/lib/lessonEngine/exerciseValidator";
+import { enrichExerciseMetadata } from "@/lib/lessonEngine/exerciseEnrichment";
 import { showHeartRestoredToast } from "@/lib/gamificationToasts";
 import { fadeSlideUp } from "@/lib/animations";
 import { ExerciseDisplayProvider } from "@/contexts/ExerciseDisplayContext";
@@ -95,10 +96,13 @@ export default function LessonPage({ params }: PageProps) {
   const [showCorrectFlash, setShowCorrectFlash] = useState(false);
 
   const activeExercise = exercises[currentIndex] ?? null;
-  const normalized = activeExercise ? normalizeExercise(activeExercise) : null;
-  const exerciseValid = activeExercise ? isExerciseValid(activeExercise) : true;
-  const invalidReason = activeExercise && !exerciseValid
-    ? validateExercise(activeExercise).reason
+  const enrichedExercise = activeExercise
+    ? enrichExerciseMetadata(activeExercise, vocabMap)
+    : null;
+  const normalized = enrichedExercise ? normalizeExercise(enrichedExercise) : null;
+  const exerciseValid = enrichedExercise ? isExerciseValid(enrichedExercise, vocabMap) : true;
+  const invalidReason = enrichedExercise && !exerciseValid
+    ? validateExercise(enrichedExercise, vocabMap).reason
     : undefined;
 
   const feedbackWord = useMemo(() => {
@@ -120,10 +124,16 @@ export default function LessonPage({ params }: PageProps) {
   const loadRequestRef = useRef(0);
 
   useEffect(() => {
-    if (activeExercise && !isExerciseValid(activeExercise)) {
-      console.warn("[Lesson] Skipping invalid exercise at index", currentIndex, invalidReason);
+    if (activeExercise && !isExerciseValid(enrichedExercise ?? activeExercise, vocabMap)) {
+      console.error("[Lesson] Invalid exercise — auto-skipping", {
+        exerciseId: activeExercise.id,
+        template: activeExercise.metadata?.template ?? activeExercise.type,
+        lessonId: activeExercise.lesson_id || lessonId,
+        reason: invalidReason,
+      });
+      forceSkipBrokenExercise();
     }
-  }, [activeExercise, currentIndex, invalidReason]);
+  }, [activeExercise, enrichedExercise, currentIndex, invalidReason, lessonId, vocabMap, forceSkipBrokenExercise]);
 
   useEffect(() => {
     if (!routeReady || !activeCourseId || !router.isReady) return;
@@ -262,7 +272,7 @@ export default function LessonPage({ params }: PageProps) {
     return (
       <ExerciseByTemplate
         normalized={normalized}
-        exercise={activeExercise}
+        exercise={enrichedExercise ?? activeExercise}
         selectedOption={selectedOption}
         typedAnswer={typedAnswer}
         selectedWords={selectedWords}
@@ -397,7 +407,7 @@ export default function LessonPage({ params }: PageProps) {
   const progressPercent = exercises.length > 0 ? (currentIndex / exercises.length) * 100 : 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#131F24] text-slate-100 relative overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#131F24] text-slate-100 relative overflow-x-hidden max-lg:min-h-[100dvh]">
       <AnimatePresence>
         {showCorrectFlash && (
           <motion.div
@@ -447,7 +457,7 @@ export default function LessonPage({ params }: PageProps) {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-start p-6 text-center max-w-2xl w-full mx-auto overflow-y-auto pb-40 pt-4">
+      <main className="flex-1 flex flex-col items-center justify-start p-6 text-center max-w-2xl w-full mx-auto overflow-y-auto pb-40 pt-4 max-lg:px-4 max-lg:pb-[max(10rem,env(safe-area-inset-bottom))]">
         <ExerciseDisplayProvider
           targetLang={targetLang}
           unitIndex={0}
@@ -460,6 +470,9 @@ export default function LessonPage({ params }: PageProps) {
         <AnimatePresence mode="wait">
           {activeExercise && normalized && !exerciseValid && (
             <InvalidExercisePanel
+              exerciseId={activeExercise.id}
+              template={String(activeExercise.metadata?.template ?? activeExercise.type)}
+              lessonId={activeExercise.lesson_id || lessonId}
               reason={invalidReason}
               onSkip={forceSkipBrokenExercise}
               loading={loading}

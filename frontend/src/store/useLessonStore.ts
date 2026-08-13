@@ -58,8 +58,6 @@ interface LessonState {
   setTypedAnswer: (text: string) => void;
   selectWord: (word: string) => void;
   unselectWord: (index: number) => void;
-  selectLeftPair: (card: string) => void;
-  selectRightPair: (card: string) => void;
   checkAnswer: () => Promise<void>;
   skipExercise: () => void;
   forceSkipBrokenExercise: () => void;
@@ -241,16 +239,6 @@ export const useLessonStore = create<LessonState>((set, get) => ({
     }));
   },
 
-  selectLeftPair: (card: string) => {
-    if (get().isAnswerChecked) return;
-    set({ selectedLeftCard: card });
-  },
-
-  selectRightPair: (card: string) => {
-    if (get().isAnswerChecked) return;
-    set({ selectedRightCard: card });
-  },
-
   checkAnswer: async () => {
     const {
       attemptId,
@@ -266,7 +254,7 @@ export const useLessonStore = create<LessonState>((set, get) => ({
     if (!attemptId || exercises.length === 0) return;
 
     const exercise = exercises[currentIndex];
-    if (!isExerciseValid(exercise)) {
+    if (!exercise || !isExerciseValid(exercise, get().vocabMap)) {
       get().forceSkipBrokenExercise();
       return;
     }
@@ -367,7 +355,7 @@ export const useLessonStore = create<LessonState>((set, get) => ({
     const exercise = exercises[currentIndex];
     if (!exercise) return;
 
-    const invalid = !isExerciseValid(exercise);
+    const invalid = !isExerciseValid(exercise, state.vocabMap);
     if (!invalid) {
       const meta = exercise.metadata ?? {};
       const layout = (meta.layout as string) ?? "";
@@ -426,6 +414,8 @@ export const useLessonStore = create<LessonState>((set, get) => ({
       hearts,
       progressEngine,
       vocabMap,
+      isAnswerChecked,
+      isCorrect,
     } = get();
     if (!attemptId) return false;
 
@@ -434,8 +424,25 @@ export const useLessonStore = create<LessonState>((set, get) => ({
       return false;
     }
 
+    // Duolingo-style retry: wrong answers stay on the same exercise until correct.
+    if (isAnswerChecked && !isCorrect) {
+      set({
+        selectedOption: null,
+        typedAnswer: "",
+        selectedWords: [],
+        matchedPairs: {},
+        selectedLeftCard: null,
+        selectedRightCard: null,
+        isAnswerChecked: false,
+        isCorrect: false,
+        correctAnswer: null,
+        error: null,
+      });
+      return false;
+    }
+
     const exercise = exercises[currentIndex];
-    if (exercise && !isExerciseValid(exercise)) {
+    if (exercise && !isExerciseValid(exercise, vocabMap)) {
       get().forceSkipBrokenExercise();
       return false;
     }

@@ -36,6 +36,11 @@ export function buildRemedialQuestion(
     metadata: {
       phase: "remedial" as QuestionPhase,
       vocabulary_id: word.id,
+      source_text: word.english,
+      target_text: word.target,
+      englishMeaning: word.english,
+      targetWord: word.target,
+      romanization: word.romanization,
       targetLanguage: targetLang,
       options,
       direction: "english_to_target",

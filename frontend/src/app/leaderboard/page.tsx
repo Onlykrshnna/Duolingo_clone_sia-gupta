@@ -9,6 +9,8 @@ import { LeaderboardEntry, UserStats } from "@/lib/types";
 import { RefreshCw } from "lucide-react";
 import DuoButton from "@/components/DuoButton";
 import { staggerContainer, staggerItem } from "@/lib/animations";
+import { hoverLift, interactionEase } from "@/lib/interactions";
+import { HoverCard } from "@/components/interactions";
 
 const ShieldsIllustration = () => (
   <div className="relative w-56 h-36 flex items-center justify-center my-2 select-none">
@@ -65,14 +67,14 @@ export default function LeaderboardPage() {
   const currentUserId = stats?.user_id;
 
   return (
-    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6]">
+    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6] max-lg:min-h-[100dvh] max-lg:overflow-x-clip">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col lg:pl-[256px]">
+      <div className="flex-1 flex flex-col lg:pl-[256px] min-w-0 max-lg:overflow-x-clip">
         <div className="h-[50px] lg:hidden w-full" />
 
-        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-12 items-start">
-          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col items-center text-center space-y-4">
+        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-12 items-start min-w-0 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col items-center text-center space-y-4 min-w-0">
             <ShieldsIllustration />
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 font-nunito tracking-tight">
@@ -114,21 +116,29 @@ export default function LeaderboardPage() {
                       key={entry.id}
                       variants={staggerItem}
                       layout
-                      className={`flex items-center justify-between py-3.5 px-4 rounded-xl transition-colors ${
+                      whileHover={!isCurrentUser ? hoverLift : undefined}
+                      transition={interactionEase}
+                      className={`flex items-center justify-between py-3.5 px-4 rounded-xl transition-[background-color,border-color,box-shadow] duration-[170ms] ${
                         isCurrentUser
-                          ? "bg-[#1CB0F6]/15 border-2 border-[#1CB0F6]/40 shadow-[0_0_20px_rgba(28,176,246,0.15)]"
-                          : "hover:bg-[#1F2E35]/50 border-2 border-transparent"
+                          ? "bg-[#58CC02]/10 border-2 border-brand-green/40 shadow-[0_0_20px_rgba(88,204,2,0.15)]"
+                          : "hover:bg-[#1F2E35]/80 border-2 border-transparent hover:border-[#37464F]/60 hover:shadow-[0_4px_14px_rgba(0,0,0,0.18)]"
                       }`}
                     >
                       <div className="flex items-center gap-4 min-w-0">
-                        <span
+                        <motion.span
+                          whileHover={{ scale: 1.08 }}
+                          transition={interactionEase}
                           className={`font-extrabold text-sm w-6 text-center shrink-0 ${
                             entry.rank <= 3 ? "text-amber-400" : "text-slate-500"
                           }`}
                         >
                           {entry.rank}
-                        </span>
-                        <div className="w-10 h-10 rounded-full bg-[#202F36] border border-[#37464F] flex items-center justify-center shrink-0 overflow-hidden">
+                        </motion.span>
+                        <motion.div
+                          whileHover={{ scale: 1.06 }}
+                          transition={interactionEase}
+                          className="w-10 h-10 rounded-full bg-[#202F36] border border-[#37464F] flex items-center justify-center shrink-0 overflow-hidden"
+                        >
                           {entry.avatar_url ? (
                             <img
                               src={entry.avatar_url}
@@ -141,23 +151,27 @@ export default function LeaderboardPage() {
                           ) : (
                             <span className="text-lg">🦉</span>
                           )}
-                        </div>
+                        </motion.div>
                         <span
                           className={`font-extrabold text-sm truncate ${
-                            isCurrentUser ? "text-[#1CB0F6]" : "text-slate-200"
+                            isCurrentUser ? "text-brand-green" : "text-slate-200"
                           }`}
                         >
                           {entry.display_name}
                           {isCurrentUser && (
-                            <span className="ml-2 text-[10px] uppercase tracking-wider text-[#1CB0F6]/80">
+                            <span className="ml-2 text-[10px] uppercase tracking-wider text-brand-green/80">
                               You
                             </span>
                           )}
                         </span>
                       </div>
-                      <span className="font-extrabold text-sm text-amber-400 shrink-0 ml-2">
+                      <motion.span
+                        whileHover={{ scale: 1.05, filter: "brightness(1.15)" }}
+                        transition={interactionEase}
+                        className="font-extrabold text-sm text-amber-400 shrink-0 ml-2"
+                      >
                         {entry.weekly_xp} XP
-                      </span>
+                      </motion.span>
                     </motion.div>
                   );
                 })}
@@ -172,7 +186,7 @@ export default function LeaderboardPage() {
           </main>
 
           <aside className="hidden lg:flex flex-col w-[350px] shrink-0 h-fit sticky top-8">
-            <div className="border-2 border-[#37464F] bg-[#131F24] p-6 rounded-2xl flex flex-col gap-3 text-left shadow-sm">
+            <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-6 flex flex-col gap-3 text-left shadow-sm">
               <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest font-nunito">
                 YOUR STANDING
               </span>
@@ -194,7 +208,7 @@ export default function LeaderboardPage() {
               <p className="text-xs text-slate-400 font-semibold leading-relaxed pt-2 border-t border-[#37464F]">
                 Complete lessons to earn XP and climb the weekly leaderboard.
               </p>
-            </div>
+            </HoverCard>
           </aside>
         </div>
       </div>

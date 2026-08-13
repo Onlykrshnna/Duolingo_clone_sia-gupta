@@ -97,6 +97,7 @@ class LessonGenerator:
 
 
 from learning_engine.exercise_validator import validate_exercise
+from exercise_api_utils import _enrich_step_metadata
 
 
 def persist_generated_lesson(session, lesson_uuid, lesson_data: dict, *, seed: int | None = 42) -> int:
@@ -105,6 +106,7 @@ def persist_generated_lesson(session, lesson_uuid, lesson_data: dict, *, seed: i
 
     persisted = 0
     for step in steps:
+        step = _enrich_step_metadata(step)
         meta = step.get("metadata") or {}
         word = None
         if meta.get("vocabulary_id"):

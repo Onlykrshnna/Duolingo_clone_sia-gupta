@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Zap, Heart, Target, Gem } from "lucide-react";
@@ -12,6 +12,7 @@ import { celebrateLessonComplete } from "@/lib/gamificationToasts";
 import { sideCannons, burstConfetti, fireworks } from "@/lib/confettiUtils";
 import { playSound } from "@/lib/sounds";
 import { staggerContainer, staggerItem } from "@/lib/animations";
+import { AnimatedCounter } from "@/components/interactions";
 import { useCelebrationStore } from "@/store/useCelebrationStore";
 
 interface LessonCompleteModalProps {
@@ -19,29 +20,6 @@ interface LessonCompleteModalProps {
   previousStreak?: number;
   accuracy?: number;
   wordsLearned?: string[];
-}
-
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    let frame = 0;
-    const totalFrames = 24;
-    const step = value / totalFrames;
-    const interval = setInterval(() => {
-      frame += 1;
-      setDisplay(Math.min(value, Math.round(step * frame)));
-      if (frame >= totalFrames) clearInterval(interval);
-    }, 30);
-    return () => clearInterval(interval);
-  }, [value]);
-
-  return (
-    <span>
-      {display}
-      {suffix}
-    </span>
-  );
 }
 
 export const LessonCompleteModal: React.FC<LessonCompleteModalProps> = ({

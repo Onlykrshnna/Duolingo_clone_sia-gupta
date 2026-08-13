@@ -1,5 +1,6 @@
 import { Exercise } from "@/lib/types";
 import { normalizeExercise, NormalizedExercise } from "@/lib/exerciseUtils";
+import { enrichExercises, enrichExerciseMetadata, resolveSourceTarget, VocabLookup, buildVocabMapFromExercises } from "./exerciseEnrichment";
 
 const EMPTY_QUOTE = /["']\s*["']|for\s+["']\s*["']/i;
 
@@ -14,9 +15,13 @@ export type ExerciseValidationResult = {
   reason: string;
 };
 
-export function validateExercise(exercise: Exercise): ExerciseValidationResult {
-  const normalized = normalizeExercise(exercise);
-  const meta = exercise.metadata ?? {};
+export function validateExercise(
+  exercise: Exercise,
+  vocabMap?: VocabLookup
+): ExerciseValidationResult {
+  const enriched = enrichExerciseMetadata(exercise, vocabMap);
+  const normalized = normalizeExercise(enriched);
+  const meta = enriched.metadata ?? {};
 
   if (normalized.isIntro) {
     const intro = normalized.intro;
@@ -39,11 +44,26 @@ export function validateExercise(exercise: Exercise): ExerciseValidationResult {
     return { valid: true, reason: "" };
   }
 
-  const english = (meta.englishMeaning as string) ?? (meta.english as string) ?? "";
-  const target = (meta.targetWord as string) ?? (meta.target as string) ?? "";
+  const english = resolveSourceTarget(enriched, normalized, vocabMap).sourceText;
+  const target = resolveSourceTarget(enriched, normalized, vocabMap).targetText;
   const vocabId = meta.vocabulary_id as string | undefined;
 
-  if (vocabId && (isBlank(english) || isBlank(target))) {
+  const templatesNeedingVocab = new Set([
+    "flashcard",
+    "image_vocab",
+    "speaking",
+    "mini_conversation",
+  ]);
+
+  if (
+    vocabId &&
+    templatesNeedingVocab.has(normalized.template) &&
+    (isBlank(english) || isBlank(target))
+  ) {
+    return { valid: false, reason: "missing source or target text" };
+  }
+
+  if (normalized.isIntro && (isBlank(english) || isBlank(target))) {
     return { valid: false, reason: "missing source or target text" };
   }
 
@@ -55,24 +75,24 @@ export function validateExercise(exercise: Exercise): ExerciseValidationResult {
     ["multiple_choice", "fill_blank", "image_selection", "listening"].includes(normalized.type) &&
     !normalized.isIntro
   ) {
-    const choiceResult = validateChoices(exercise, normalized);
+    const choiceResult = validateChoices(enriched, normalized);
     if (!choiceResult.valid) return choiceResult;
   }
 
   if (normalized.type === "type_answer") {
-    const text = exercise.correct_answer?.text;
+    const text = enriched.correct_answer?.text;
     if (isBlank(text)) return { valid: false, reason: "missing correct text" };
   }
 
   if (normalized.type === "word_bank") {
-    const words: string[] = exercise.correct_answer?.words ?? [];
+    const words: string[] = enriched.correct_answer?.words ?? [];
     if (!words.length || words.some(isBlank)) return { valid: false, reason: "empty word bank answer" };
     if (normalized.tokens.some(isBlank)) return { valid: false, reason: "empty word bank token" };
   }
 
   const template = normalized.template;
   if (["listening", "listen_type", "listen_image"].includes(template)) {
-    if (!exercise.prompt_audio_url && !normalized.audioUrl && !normalized.fallbackText) {
+    if (!enriched.prompt_audio_url && !normalized.audioUrl && !normalized.fallbackText) {
       return { valid: false, reason: "missing audio for listening exercise" };
     }
   }
@@ -145,12 +165,21 @@ export function filterValidExercises(
   valid: Exercise[];
   rejected: { exercise: Exercise; reason: string }[];
 } {
+  const enrichedList = enrichExercises(exercises);
+  const vocabMap = buildVocabMapFromExercises(enrichedList);
   const valid: Exercise[] = [];
   const rejected: { exercise: Exercise; reason: string }[] = [];
 
-  for (const ex of exercises) {
-    const result = validateExercise(ex);
+  for (const ex of enrichedList) {
+    const result = validateExercise(ex, vocabMap);
     if (!result.valid) {
+      console.warn("[ExerciseValidator] Rejected exercise:", {
+        id: ex.id,
+        type: ex.type,
+        template: ex.metadata?.template,
+        lesson_id: ex.lesson_id,
+        reason: result.reason,
+      });
       rejected.push({ exercise: ex, reason: result.reason });
       continue;
     }
@@ -171,7 +200,11 @@ export function filterValidExercises(
   return { valid, rejected };
 }
 
-export function isExerciseValid(exercise: Exercise | null | undefined): boolean {
+export function isExerciseValid(
+  exercise: Exercise | null | undefined,
+  vocabMap?: VocabLookup
+): boolean {
   if (!exercise) return false;
-  return validateExercise(exercise).valid;
+  const enriched = enrichExerciseMetadata(exercise, vocabMap);
+  return validateExercise(enriched, vocabMap).valid;
 }

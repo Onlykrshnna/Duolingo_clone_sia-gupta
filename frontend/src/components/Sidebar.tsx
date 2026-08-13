@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sidebarHover, interactionEase, tapPress } from "@/lib/interactions";
+import { useInteractionMotion } from "@/components/interactions";
 
 // Custom SVG Icons matching real Duolingo styling
 const LearnIcon = ({ active }: { active: boolean }) => (
@@ -173,6 +175,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   hasNotification = false,
   onClick,
 }) => {
+  const { enabled } = useInteractionMotion();
+
   // Render corresponding icon dynamically
   const renderIcon = () => {
     switch (iconName) {
@@ -193,26 +197,44 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
     }
   };
 
-  return (
-    <Link href={href} onClick={onClick} className="block select-none">
+  const itemClass = `flex items-center gap-3.5 px-3.5 py-2.5 rounded-2xl font-extrabold uppercase tracking-[0.08em] border-2 text-[13px] leading-none transition-[background-color,border-color,box-shadow] duration-[170ms] ${
+    active
+      ? "bg-[#183949] border-[#84D8FF] text-[#84D8FF] shadow-[inset_0_0_0_1px_rgba(132,216,255,0.15),0_0_16px_rgba(132,216,255,0.12)] scale-[1.02]"
+      : "bg-transparent border-transparent text-[#AFBFC6] hover:bg-[#202F36] hover:text-[#D1DEE4] hover:shadow-[0_4px_14px_rgba(0,0,0,0.18)]"
+  }`;
+
+  const inner = (
+    <>
       <motion.div
-        whileHover={{ scale: 1.02, x: 2 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-2xl font-extrabold uppercase tracking-[0.08em] border-2 text-[13px] leading-none ${
-          active
-            ? "bg-[#183949] border-[#84D8FF] text-[#84D8FF] shadow-[inset_0_0_0_1px_rgba(132,216,255,0.15)]"
-            : "bg-transparent border-transparent text-[#AFBFC6] hover:bg-[#202F36] hover:text-[#D1DEE4]"
-        }`}
+        className="w-9 h-9 flex items-center justify-center shrink-0 relative"
+        whileHover={enabled ? { scale: 1.08, y: -1 } : undefined}
+        transition={interactionEase}
       >
-        <div className="w-9 h-9 flex items-center justify-center shrink-0 relative">
-          {renderIcon()}
-          {hasNotification && (
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-rose-red border-2 border-[#131F24] rounded-full" />
-          )}
-        </div>
-        <span className="pt-0.5">{label}</span>
+        {renderIcon()}
+        {hasNotification && (
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-rose-red border-2 border-[#131F24] rounded-full" />
+        )}
       </motion.div>
+      <span className={`pt-0.5 transition-colors duration-[170ms] ${active ? "" : "group-hover:text-[#D1DEE4]"}`}>
+        {label}
+      </span>
+    </>
+  );
+
+  return (
+    <Link href={href} onClick={onClick} className="block select-none group">
+      {enabled ? (
+        <motion.div
+          whileHover={sidebarHover}
+          whileTap={tapPress}
+          transition={interactionEase}
+          className={itemClass}
+        >
+          {inner}
+        </motion.div>
+      ) : (
+        <div className={itemClass}>{inner}</div>
+      )}
     </Link>
   );
 };

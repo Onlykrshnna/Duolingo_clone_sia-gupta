@@ -19,7 +19,6 @@ interface CourseState {
   loadAvailableCourses: () => Promise<void>;
   switchCourse: (courseId: string) => Promise<{ stats: UserStats; path: PathData }>;
   enrollCourse: (courseId: string, options?: { redirectToFirstLesson?: boolean }) => Promise<{ firstLessonId: string | null }>;
-  hydrateFromProfile: (activeCourseId: string | null) => void;
 }
 
 export const useCourseStore = create<CourseState>()(
@@ -30,12 +29,6 @@ export const useCourseStore = create<CourseState>()(
       availableCourses: [],
       loading: false,
       switching: false,
-
-      hydrateFromProfile: (activeCourseId) => {
-        if (activeCourseId) {
-          persistActiveCourseId(activeCourseId);
-        }
-      },
 
       loadEnrolledCourses: async () => {
         set({ loading: true });

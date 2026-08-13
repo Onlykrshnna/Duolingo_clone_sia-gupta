@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Plus, Check } from "lucide-react";
+import { GLOW_STYLES, hoverLift, interactionEase, tapPress } from "@/lib/interactions";
 import { UserCourse } from "@/lib/types";
 import { useCourseStore } from "@/store/useCourseStore";
 import LanguageFlag from "./LanguageFlag";
@@ -84,12 +85,13 @@ export const CourseSwitcher: React.FC<CourseSwitcherProps> = ({ onAddCourse, com
       <motion.button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
+        whileHover={hoverLift}
+        whileTap={tapPress}
+        transition={interactionEase}
         aria-haspopup="listbox"
         aria-expanded={open}
         disabled={switching}
-        className={`flex items-center gap-2 rounded-[18px] border-2 border-[#37464F] bg-[#1F2E35] hover:bg-[#243840] shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-colors cursor-pointer ${
+        className={`flex items-center gap-2 rounded-[18px] border-2 border-[#37464F] bg-[#1F2E35] hover:bg-[#243840] shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-[background-color,border-color,box-shadow] duration-[170ms] cursor-pointer ${GLOW_STYLES.language} ${
           compact ? "px-2.5 py-1.5 min-h-[40px]" : "px-3 py-2 min-h-[44px]"
         } ${switching ? "opacity-60" : ""}`}
       >
@@ -110,7 +112,7 @@ export const CourseSwitcher: React.FC<CourseSwitcherProps> = ({ onAddCourse, com
             initial={{ opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
             className="absolute left-0 top-full mt-2 z-50 w-[min(320px,calc(100vw-2rem))] rounded-[20px] border-2 border-[#37464F] bg-[#1A2830] shadow-[0_16px_40px_rgba(0,0,0,0.45)] overflow-hidden"
             role="listbox"
           >
@@ -126,7 +128,9 @@ export const CourseSwitcher: React.FC<CourseSwitcherProps> = ({ onAddCourse, com
                   role="option"
                   aria-selected={course.is_active}
                   onClick={() => handleSwitch(course)}
-                  whileHover={{ scale: 1.01, backgroundColor: "#243840" }}
+                  whileHover={{ scale: 1.02, x: 2, backgroundColor: "#243840" }}
+                  whileTap={tapPress}
+                  transition={interactionEase}
                   className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
                     course.is_active ? "bg-[#1a3d24]/40" : ""
                   } ${focusedIndex === idx ? "bg-[#243840]" : ""}`}

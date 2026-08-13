@@ -3,6 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { lockedShake, nodeHover, nodeTap, interactionEase } from "@/lib/interactions";
+import { useInteractionMotion } from "@/components/interactions";
 import { getPathNodeSide, getPathNodeStyle } from "@/lib/pathLayout";
 import PathMascot from "./PathMascot";
 
@@ -72,6 +74,8 @@ export const LessonButton: React.FC<LessonButtonProps> = ({
   type = "star",
   isCurrentLesson = false,
 }) => {
+  const { enabled } = useInteractionMotion();
+
   const nodeSide = getPathNodeSide(index);
   const nodeStyle = getPathNodeStyle(index);
 
@@ -241,12 +245,44 @@ export const LessonButton: React.FC<LessonButtonProps> = ({
         </div>
       )}
 
+      {isCompleted && enabled && (
+        <motion.div
+          className="absolute w-[70px] h-[70px] rounded-full pointer-events-none overflow-hidden z-[1]"
+          animate={{ opacity: [0.35, 0.65, 0.35] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent"
+            animate={{ x: ["-120%", "120%"] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.2 }}
+          />
+        </motion.div>
+      )}
+
+      <motion.div
+        animate={
+          enabled && isCurrentLesson && !isLocked
+            ? { scale: [1, 1.04, 1], y: [0, -2, 0] }
+            : undefined
+        }
+        transition={
+          enabled && isCurrentLesson && !isLocked
+            ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+            : interactionEase
+        }
+      >
       <motion.div
         role={canNavigate ? undefined : undefined}
         tabIndex={canNavigate ? undefined : undefined}
-        whileHover={canNavigate ? { scale: 1.06, y: -2 } : undefined}
-        whileTap={canNavigate ? { scale: 0.94, y: 4 } : undefined}
-        transition={{ duration: 0.12, ease: "easeOut" }}
+        whileHover={canNavigate && enabled ? nodeHover : undefined}
+        whileTap={
+          isLocked && enabled
+            ? lockedShake
+            : canNavigate && enabled
+              ? nodeTap
+              : undefined
+        }
+        transition={isLocked && enabled ? { duration: 0.35 } : interactionEase}
         className={`w-[70px] h-[70px] rounded-full flex items-center justify-center outline-none ${btnClass} ${
           isLocked ? "cursor-not-allowed" : canNavigate ? "cursor-pointer" : "cursor-default"
         }`}
@@ -259,6 +295,7 @@ export const LessonButton: React.FC<LessonButtonProps> = ({
         ) : (
           renderIcon()
         )}
+      </motion.div>
       </motion.div>
     </motion.div>
   );

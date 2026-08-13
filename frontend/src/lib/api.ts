@@ -183,42 +183,6 @@ export const api = {
       }),
       ...withOpts(options),
     }),
-
-  getWritingSystem: (courseId: string, options?: ApiOpts) => {
-    guardCourseId(courseId, "/courses/:id/writing-system");
-    return request<import("./types").WritingSystemOverview>(
-      `/courses/${courseId}/writing-system`,
-      withOpts(options)
-    );
-  },
-
-  getWritingCharacters: (courseId: string, sectionSlug: string, options?: ApiOpts) => {
-    guardCourseId(courseId, "/courses/:id/writing-system/:slug/characters");
-    return request<import("./types").WritingCharacter[]>(
-      `/courses/${courseId}/writing-system/${sectionSlug}/characters`,
-      withOpts(options)
-    );
-  },
-
-  submitCharacterProgress: (
-    courseId: string,
-    characterId: string,
-    correct: boolean,
-    options?: ApiOpts
-  ) => {
-    guardCourseId(courseId, "/courses/:id/writing-system/progress");
-    return request<{
-      success: boolean;
-      learned: boolean;
-      mastered: boolean;
-      practice_count: number;
-      accuracy_percent: number;
-    }>(`/courses/${courseId}/writing-system/progress`, {
-      method: "POST",
-      body: JSON.stringify({ character_id: characterId, correct }),
-      ...withOpts(options),
-    });
-  },
 };
 
 async function request<T>(path: string, options?: ApiRequestOptions): Promise<T> {

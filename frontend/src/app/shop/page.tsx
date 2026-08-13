@@ -8,6 +8,10 @@ import { api } from "@/lib/api";
 import { UserStats } from "@/lib/types";
 import { Lock, RefreshCw } from "lucide-react";
 import DuoButton from "@/components/DuoButton";
+import { HoverCard } from "@/components/interactions";
+
+const shopRowClass =
+  "py-5 flex items-center justify-between gap-4 text-left rounded-xl transition-[background-color,transform,box-shadow] duration-[170ms] hover:bg-[#1F2E35]/40 px-1 -mx-1";
 
 // Start a Family Plan Banner Characters Graphic
 const FamilyPlanGraphic = () => (
@@ -70,6 +74,9 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [refilling, setRefilling] = useState(false);
+  const [refillMessage, setRefillMessage] = useState<string | null>(null);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -87,6 +94,33 @@ export default function ShopPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const heartsFull = stats ? stats.hearts_current >= stats.hearts_max : true;
+  const canRefill = stats ? !heartsFull && stats.gems >= 10 : false;
+
+  const handleRefillHearts = async () => {
+    if (!stats || heartsFull || refilling) return;
+    try {
+      setRefilling(true);
+      setRefillMessage(null);
+      const response = await api.refillHearts("me");
+      setStats((prev) =>
+        prev
+          ? {
+              ...prev,
+              hearts_current: response.hearts_current,
+              gems: response.gems_remaining,
+            }
+          : prev
+      );
+      setRefillMessage(response.message);
+    } catch (err: unknown) {
+      console.error(err);
+      setRefillMessage("Could not refill hearts. Try again.");
+    } finally {
+      setRefilling(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -113,20 +147,20 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6]">
+    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6] max-lg:min-h-[100dvh] max-lg:overflow-x-clip">
       {/* Sidebar Navigation */}
       <Sidebar />
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col lg:pl-[256px]">
+      <div className="flex-1 flex flex-col lg:pl-[256px] min-w-0 max-lg:overflow-x-clip">
         {/* Mobile top spacer */}
         <div className="h-[50px] lg:hidden w-full" />
 
         {/* Content Layout */}
-        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-10 items-start">
+        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-10 items-start min-w-0 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]">
           
           {/* Center Main Shop Feed */}
-          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col">
+          <main className="flex-1 max-w-[560px] w-full mx-auto flex flex-col min-w-0">
             
             {/* 1. Start a family plan! Gradient Banner */}
             <div className="bg-gradient-to-r from-[#17263C] via-[#211E48] to-[#3B194E] border border-[#37464F]/50 rounded-3xl p-6 sm:p-7 flex items-center justify-between shadow-md relative overflow-hidden select-none mb-8">
@@ -152,9 +186,9 @@ export default function ShopPage() {
             <div className="flex flex-col border-y border-[#37464F] divide-y divide-[#37464F]">
               
               {/* Refill Hearts */}
-              <div className="py-5 flex items-center justify-between gap-4 text-left">
+              <div className={shopRowClass}>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 flex items-center justify-center text-3xl shrink-0 select-none">
+                  <div className="w-12 h-12 flex items-center justify-center text-3xl shrink-0 select-none transition-transform duration-[170ms] hover:scale-110">
                     ❤️
                   </div>
                   <div className="flex flex-col">
@@ -168,15 +202,23 @@ export default function ShopPage() {
                 </div>
                 
                 <button
-                  disabled
-                  className="border-2 border-[#37464F] bg-[#131F24] text-slate-500 font-extrabold rounded-2xl px-6 py-2.5 text-xs tracking-widest uppercase cursor-not-allowed font-nunito shrink-0"
+                  disabled={heartsFull || !canRefill || refilling}
+                  onClick={handleRefillHearts}
+                  className={`border-2 font-extrabold rounded-2xl px-6 py-2.5 text-xs tracking-widest uppercase font-nunito shrink-0 min-h-[44px] transition ${
+                    heartsFull || !canRefill
+                      ? "border-[#37464F] bg-[#131F24] text-slate-500 cursor-not-allowed"
+                      : "border-[#58CC02] bg-[#58CC02] text-white hover:brightness-105 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer shadow-[0_0_12px_rgba(88,204,2,0.2)]"
+                  }`}
                 >
-                  FULL
+                  {refilling ? "…" : heartsFull ? "FULL" : canRefill ? "REFILL" : "10 💎"}
                 </button>
               </div>
+              {refillMessage && (
+                <p className="text-xs text-slate-400 font-semibold font-nunito -mt-2 pb-2">{refillMessage}</p>
+              )}
 
               {/* Unlimited Hearts */}
-              <div className="py-5 flex items-center justify-between gap-4 text-left">
+              <div className={shopRowClass}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-sky-500 flex items-center justify-center text-white text-2xl font-bold border border-teal-300/40 shadow-sm shrink-0">
                     ♾️
@@ -191,9 +233,11 @@ export default function ShopPage() {
                   </div>
                 </div>
 
-                <button className="border-2 border-[#37464F] hover:bg-[#1F2E35] hover:border-slate-500 active:scale-95 text-purple-400 font-extrabold rounded-2xl px-6 py-2.5 text-xs tracking-widest uppercase transition cursor-pointer font-nunito shrink-0">
-                  FREE TRIAL
-                </button>
+                <Link href="/super">
+                  <button className="border-2 border-[#37464F] hover:bg-[#1F2E35] hover:border-slate-500 hover:-translate-y-0.5 active:scale-[0.98] text-purple-400 font-extrabold rounded-2xl px-6 py-2.5 text-xs tracking-widest uppercase transition duration-[170ms] cursor-pointer font-nunito shrink-0 min-h-[44px]">
+                    FREE TRIAL
+                  </button>
+                </Link>
               </div>
 
             </div>
@@ -203,7 +247,8 @@ export default function ShopPage() {
               Power-Ups
             </h2>
 
-            <div className="border-y border-[#37464F] py-5 flex items-center justify-between gap-4 text-left">
+            <div className={`border-y border-[#37464F] ${shopRowClass}`}>
+              <div className="flex items-center gap-4 w-full justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 flex items-center justify-center text-3xl shrink-0 select-none">
                   🧊
@@ -223,11 +268,12 @@ export default function ShopPage() {
                 </div>
               </div>
 
-              <button className="border-2 border-[#37464F] hover:bg-[#1F2E35] hover:border-slate-500 active:scale-95 text-[#1CB0F6] font-extrabold rounded-2xl px-5 py-2.5 text-xs tracking-wider uppercase transition cursor-pointer font-nunito shrink-0 flex items-center gap-1.5">
+              <button className="border-2 border-[#37464F] hover:bg-[#1F2E35] hover:border-slate-500 hover:-translate-y-0.5 active:scale-[0.98] text-[#1CB0F6] font-extrabold rounded-2xl px-5 py-2.5 text-xs tracking-wider uppercase transition duration-[170ms] cursor-pointer font-nunito shrink-0 flex items-center gap-1.5 min-h-[44px] hover:shadow-[0_0_12px_rgba(56,189,248,0.18)]">
                 <span>GET FOR:</span>
-                <span className="text-sm">💎</span>
+                <span className="text-sm transition-transform duration-[170ms] hover:scale-110">💎</span>
                 <span>200</span>
               </button>
+              </div>
             </div>
 
           </main>
@@ -247,7 +293,7 @@ export default function ShopPage() {
             />
 
             {/* 1. Unlock Leaderboards! Card */}
-            <div className="border-2 border-[#37464F] bg-[#131F24] p-5 rounded-2xl flex flex-col gap-3 text-left shadow-sm">
+            <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-5 rounded-2xl flex flex-col gap-3 text-left shadow-sm">
               <h4 className="font-extrabold text-slate-100 text-sm font-nunito">
                 Unlock Leaderboards!
               </h4>
@@ -259,10 +305,8 @@ export default function ShopPage() {
                   Complete 3 more lessons to start competing
                 </p>
               </div>
-            </div>
-
-            {/* 2. Daily Quests Card */}
-            <div className="border-2 border-[#37464F] bg-[#131F24] p-5 rounded-2xl flex flex-col gap-3 text-left shadow-sm">
+            </HoverCard>
+            <HoverCard className="border-2 border-[#37464F] bg-[#131F24] p-5 rounded-2xl flex flex-col gap-3 text-left shadow-sm">
               <div className="flex items-center justify-between">
                 <h4 className="font-extrabold text-slate-100 text-sm font-nunito">Daily Quests</h4>
                 <Link href="/quests" className="text-xs font-extrabold text-[#1CB0F6] hover:underline uppercase tracking-wider font-nunito">
@@ -291,10 +335,10 @@ export default function ShopPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </HoverCard>
 
             {/* 3. Using an ad blocker? Gradient Card */}
-            <div className="bg-gradient-to-b from-[#16424D] via-[#1B294A] to-[#3B194E] border-2 border-[#37464F] rounded-2xl p-6 flex flex-col gap-4 text-center items-center shadow-sm">
+            <HoverCard className="bg-gradient-to-b from-[#16424D] via-[#1B294A] to-[#3B194E] border-2 border-[#37464F] rounded-2xl p-6 flex flex-col gap-4 text-center items-center shadow-sm">
               <AdBlockerOwlGraphic />
 
               <div className="flex flex-col gap-1.5">
@@ -306,16 +350,16 @@ export default function ShopPage() {
                 </p>
               </div>
 
-              <button className="bg-white hover:bg-slate-100 active:scale-95 text-[#131F24] font-black rounded-2xl py-3.5 w-full text-xs tracking-widest uppercase transition shadow-md font-nunito cursor-pointer">
-                TRY SUPER FOR FREE
-              </button>
+              <Link href="/super">
+                <button className="bg-white hover:bg-slate-100 hover:-translate-y-0.5 active:scale-[0.98] text-[#131F24] font-black rounded-2xl py-3.5 w-full text-xs tracking-widest uppercase transition duration-[170ms] shadow-md font-nunito cursor-pointer min-h-[44px]">
+                  TRY SUPER FOR FREE
+                </button>
+              </Link>
 
               <button className="text-[#1CB0F6] hover:underline font-extrabold text-xs tracking-widest uppercase font-nunito cursor-pointer">
                 DISABLE AD BLOCKER
               </button>
-            </div>
-
-            {/* Footer Navigation Links */}
+            </HoverCard>
             <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 text-[10px] font-extrabold text-slate-500 tracking-wider uppercase px-2 font-nunito">
               <span className="hover:text-slate-400 cursor-pointer">ABOUT</span>
               <span className="hover:text-slate-400 cursor-pointer">BLOG</span>

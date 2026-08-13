@@ -56,12 +56,12 @@ export default function SoundsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6]">
+    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6] max-lg:min-h-[100dvh] max-lg:overflow-x-clip">
       <Sidebar />
-      <div className="flex-1 flex flex-col lg:pl-[256px]">
+      <div className="flex-1 flex flex-col lg:pl-[256px] min-w-0 max-lg:overflow-x-clip">
         <div className="h-[50px] lg:hidden w-full" />
-        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-6 flex flex-col lg:flex-row gap-8">
-          <main className="flex-1 max-w-[600px] w-full mx-auto flex items-center justify-center pt-10">
+        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-6 flex flex-col lg:flex-row gap-8 min-w-0 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <main className="flex-1 max-w-[600px] w-full mx-auto flex items-center justify-center pt-10 min-w-0">
             <div className="border-2 border-light-border rounded-3xl p-8 text-center space-y-6 shadow-sm bg-dark-card-bg max-w-md flex flex-col items-center select-none">
               
               <div className="w-20 h-20 flex items-center justify-center text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-2xl">

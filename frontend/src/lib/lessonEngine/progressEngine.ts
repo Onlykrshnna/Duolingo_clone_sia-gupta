@@ -1,7 +1,10 @@
 import { Exercise } from "@/lib/types";
 import { MIN_LESSON_ACCURACY } from "./types";
+import { buildVocabMapFromExercises } from "./exerciseEnrichment";
 import { buildRemedialQuestion, extractVocabId, isGradedExercise } from "./questionGenerator";
 import { normalizeAnswer, answerInSet } from "./normalizeAnswer";
+import { enrichExerciseMetadata } from "./exerciseEnrichment";
+import { isExerciseValid } from "./exerciseValidator";
 
 const LANG_LABELS: Record<string, string> = {
   ja: "Japanese",
@@ -154,11 +157,13 @@ export class LessonProgressEngine {
         targetLang
       );
       if (remedial) {
+        const enriched = enrichExerciseMetadata(remedial, lessonVocabMap);
+        if (!isExerciseValid(enriched, lessonVocabMap)) return;
         const alreadyQueued = this.retryQueue.some(
           (r) => extractVocabId(r.exercise) === vocabId
         );
         if (!alreadyQueued) {
-          this.retryQueue.push({ exercise: remedial, insertAfterIndex: currentIndex + RETRY_DELAY });
+          this.retryQueue.push({ exercise: enriched, insertAfterIndex: currentIndex + RETRY_DELAY });
           this.remedialInjected += 1;
         }
       }
@@ -226,7 +231,7 @@ export class LessonProgressEngine {
       .map((vocabId, i) => {
         const word = lessonVocabMap.get(vocabId);
         if (!word) return null;
-        return buildRemedialQuestion(
+        const remedial = buildRemedialQuestion(
           {
             id: vocabId,
             english: word.english,
@@ -238,6 +243,9 @@ export class LessonProgressEngine {
           this.remedialInjected + i,
           targetLang
         );
+        if (!remedial) return null;
+        const enriched = enrichExerciseMetadata(remedial, lessonVocabMap);
+        return isExerciseValid(enriched, lessonVocabMap) ? enriched : null;
       })
       .filter((ex): ex is Exercise => ex !== null);
 
@@ -271,18 +279,4 @@ export class LessonProgressEngine {
   }
 }
 
-export function buildVocabMapFromExercises(exercises: Exercise[]): Map<string, { english: string; target: string; romanization: string; pronunciation?: string }> {
-  const map = new Map<string, { english: string; target: string; romanization: string; pronunciation?: string }>();
-  for (const ex of exercises) {
-    const meta = ex.metadata ?? {};
-    const id = meta.vocabulary_id as string | undefined;
-    if (!id || map.has(id)) continue;
-    map.set(id, {
-      english: meta.englishMeaning ?? meta.english ?? "",
-      target: meta.targetWord ?? meta.target ?? "",
-      romanization: meta.romanization ?? "",
-      pronunciation: (meta.pronunciation as string) || (meta.romanization as string) || undefined,
-    });
-  }
-  return map;
-}
+export { buildVocabMapFromExercises } from "./exerciseEnrichment";

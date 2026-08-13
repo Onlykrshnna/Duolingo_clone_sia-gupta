@@ -4,7 +4,6 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import router
-from writing_routes import router as writing_router
 from ensure_schema import ensure_onboarding_column
 from middleware import RequestLoggingMiddleware, register_error_handlers
 
@@ -55,7 +54,6 @@ register_error_handlers(app)
 
 # Register routes
 app.include_router(router)
-app.include_router(writing_router)
 
 @app.get("/api/v1/health")
 async def health_check():

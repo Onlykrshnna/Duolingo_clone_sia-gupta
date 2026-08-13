@@ -26,9 +26,9 @@ function ToggleSwitch({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4 rounded-xl px-2 py-1 -mx-2 transition-[background-color] duration-[170ms] hover:bg-[#243840]/50">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#131F24] text-[#1CB0F6] rounded-xl flex items-center justify-center border border-[#37464F]">
+        <div className="w-10 h-10 bg-[#131F24] text-[#1CB0F6] rounded-xl flex items-center justify-center border border-[#37464F] transition-transform duration-[170ms] hover:scale-105">
           {icon}
         </div>
         <div>
@@ -44,12 +44,12 @@ function ToggleSwitch({
           playSound("click");
           onChange(!enabled);
         }}
-        className={`relative w-14 h-8 rounded-full transition-colors duration-200 shrink-0 ${
+        className={`relative w-14 h-8 rounded-full transition-colors duration-200 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 ${
           enabled ? "bg-brand-green" : "bg-[#37464F]"
         }`}
       >
         <span
-          className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-200 ${
+          className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-200 ease-out ${
             enabled ? "translate-x-6" : "translate-x-0"
           }`}
         />
@@ -121,14 +121,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6]">
+    <div className="flex min-h-screen bg-[#131F24] text-[#F3F4F6] max-lg:min-h-[100dvh] max-lg:overflow-x-clip">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col lg:pl-[256px]">
+      <div className="flex-1 flex flex-col lg:pl-[256px] min-w-0 max-lg:overflow-x-clip">
         <div className="h-[50px] lg:hidden w-full" />
 
-        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-6 flex flex-col lg:flex-row gap-8">
-          <main className="flex-1 max-w-[600px] w-full mx-auto flex flex-col gap-6 pt-6">
+        <div className="max-w-[1056px] w-full mx-auto px-4 md:px-6 py-6 flex flex-col lg:flex-row gap-8 min-w-0 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <main className="flex-1 max-w-[600px] w-full mx-auto flex flex-col gap-6 pt-6 min-w-0">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 font-nunito">
               Settings
             </h1>

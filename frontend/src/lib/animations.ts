@@ -30,15 +30,15 @@ export const scalePop: Variants = {
 };
 
 export const modalBackdrop: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
+  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
+  visible: { opacity: 1, backdropFilter: "blur(8px)" },
+  exit: { opacity: 0, backdropFilter: "blur(0px)" },
 };
 
 export const modalContent: Variants = {
-  hidden: { opacity: 0, scale: 0.92, y: 20 },
+  hidden: { opacity: 0, scale: 0.9, y: 28 },
   visible: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.95, y: 10 },
+  exit: { opacity: 0, scale: 0.94, y: 14 },
 };
 
 export const buttonTap = {

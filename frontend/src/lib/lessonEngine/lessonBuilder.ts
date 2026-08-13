@@ -1,6 +1,7 @@
 import { Exercise } from "@/lib/types";
 import { LessonProgressEngine, buildVocabMapFromExercises } from "./progressEngine";
 import { filterValidExercises } from "./exerciseValidator";
+import { enrichExercises } from "./exerciseEnrichment";
 
 /** Prepare exercises from API and attach progress tracking. */
 export function buildLessonSession(
@@ -13,7 +14,8 @@ export function buildLessonSession(
   rejectedCount: number;
 } {
   const sorted = [...exercises].sort((a, b) => a.order_index - b.order_index);
-  const { valid, rejected } = filterValidExercises(sorted, targetLang || undefined);
+  const enriched = enrichExercises(sorted);
+  const { valid, rejected } = filterValidExercises(enriched, targetLang || undefined);
   const progress = new LessonProgressEngine();
   const vocabMap = buildVocabMapFromExercises(valid);
 
@@ -59,5 +61,6 @@ export { LessonProgressEngine, buildVocabMapFromExercises } from "./progressEngi
 export { normalizeAnswer, answersMatch, answerInSet } from "./normalizeAnswer";
 export { buildRemedialQuestion, extractVocabId, isClientGraded, isIntroExercise, isGradedExercise } from "./questionGenerator";
 export { validateExercise, isExerciseValid, filterValidExercises } from "./exerciseValidator";
+export { enrichExerciseMetadata, enrichExercises, resolveSourceTarget } from "./exerciseEnrichment";
 export type { VocabWord, LessonContent, QuestionPhase, Difficulty } from "./types";
 export { MIN_LESSON_ACCURACY } from "./types";
