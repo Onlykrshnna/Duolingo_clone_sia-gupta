@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Flame, Heart, Shield, Target } from "lucide-react";
 import { api } from "@/lib/api";
 import CourseSwitcher from "./CourseSwitcher";
-import { HoverStat } from "@/components/interactions";
-import { Flame, Heart, Shield, Target } from "lucide-react";
+import { useInteractionMotion } from "@/components/interactions";
 
 interface UserProgressProps {
   streak: number;
@@ -27,6 +28,9 @@ function formatRegenTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
+const statPillClass =
+  "flex items-center justify-center gap-1.5 min-h-[40px] px-3 rounded-xl border-2 border-transparent hover:border-[#37464F] hover:bg-[#1F2E35] transition-[background-color,border-color,box-shadow,transform] duration-[160ms] ease-out cursor-pointer shrink-0";
+
 export const UserProgress: React.FC<UserProgressProps> = ({
   streak,
   gems,
@@ -40,6 +44,7 @@ export const UserProgress: React.FC<UserProgressProps> = ({
   showCourseSwitcher = true,
   compact = false,
 }) => {
+  const { enabled: motionEnabled } = useInteractionMotion();
   const [regenSeconds, setRegenSeconds] = useState<number | null>(null);
   const [displayHearts, setDisplayHearts] = useState(hearts);
 
@@ -80,28 +85,48 @@ export const UserProgress: React.FC<UserProgressProps> = ({
   const showDailyGoal = dailyXpToday !== undefined && dailyXpGoal !== undefined;
   const textSize = compact ? "text-sm" : "text-[15px]";
 
+  const StatPill = ({
+    children,
+    title,
+  }: {
+    children: React.ReactNode;
+    title?: string;
+  }) => (
+    <motion.div
+      whileHover={
+        motionEnabled
+          ? { y: -2, boxShadow: "0 4px 14px rgba(0,0,0,0.22)" }
+          : undefined
+      }
+      whileTap={motionEnabled ? { scale: 0.98 } : undefined}
+      transition={{ duration: 0.16, ease: "easeOut" }}
+      className={statPillClass}
+      title={title}
+    >
+      {children}
+    </motion.div>
+  );
+
   return (
     <div className="flex flex-col gap-2 w-full select-none font-nunito">
       <div className="flex items-center justify-between gap-2">
         {showCourseSwitcher && onAddCourse ? (
           <CourseSwitcher onAddCourse={onAddCourse} compact={compact} />
         ) : (
-          <Link href="/" className="block">
-            <HoverStat accent="language" className="p-2">
-              <span className="text-xl">🦉</span>
-            </HoverStat>
+          <Link href="/" className="flex items-center justify-center min-h-[40px] min-w-[40px] p-2 rounded-xl border-2 border-[#37464F] shrink-0">
+            <span className="text-xl">🦉</span>
           </Link>
         )}
 
-        <HoverStat accent="streak">
-          <Flame className="w-[22px] h-[22px] text-brand-orange fill-current" />
+        <StatPill>
+          <Flame className="w-[22px] h-[22px] text-brand-orange fill-current shrink-0" />
           <span className={`font-extrabold text-brand-orange tracking-tight ${textSize}`}>
             {streak}
           </span>
-        </HoverStat>
+        </StatPill>
 
         {showDailyGoal && (
-          <HoverStat accent="goal" title={`Daily goal: ${dailyToday}/${dailyGoal} XP`}>
+          <StatPill title={`Daily goal: ${dailyToday}/${dailyGoal} XP`}>
             <div className="relative w-[22px] h-[22px] shrink-0">
               <svg className="w-[22px] h-[22px] -rotate-90" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="none" stroke="#202F36" strokeWidth="3" />
@@ -121,45 +146,45 @@ export const UserProgress: React.FC<UserProgressProps> = ({
             <span className={`font-extrabold text-brand-green tracking-tight ${textSize}`}>
               {dailyToday}/{dailyGoal}
             </span>
-          </HoverStat>
+          </StatPill>
         )}
 
         {totalXp !== undefined && (
-          <HoverStat accent="xp">
-            <span className="text-[18px] leading-none">⚡</span>
+          <StatPill>
+            <span className="text-[18px] leading-none shrink-0">⚡</span>
             <span className={`font-extrabold text-[#FFC800] tracking-tight ${textSize}`}>
               {totalXp}
             </span>
-          </HoverStat>
+          </StatPill>
         )}
 
-        <HoverStat accent="gems">
-          <svg className="w-[22px] h-[22px] text-sky-400 fill-current" viewBox="0 0 24 24">
+        <StatPill>
+          <svg className="w-[22px] h-[22px] text-sky-400 fill-current shrink-0" viewBox="0 0 24 24">
             <path d="M12 2L2 9l10 13 10-13L12 2z" />
           </svg>
           <span className={`font-extrabold text-sky-blue tracking-tight ${textSize}`}>
             {gems}
           </span>
-        </HoverStat>
+        </StatPill>
 
-        <div className="flex flex-col items-center">
-          <HoverStat accent="hearts">
+        <div className="flex flex-col items-center shrink-0">
+          <StatPill>
             {isPro ? (
               <>
-                <Shield className="w-[22px] h-[22px] text-brand-indigo fill-current" />
+                <Shield className="w-[22px] h-[22px] text-brand-indigo fill-current shrink-0" />
                 <span className={`font-extrabold text-brand-indigo tracking-tight ${textSize}`}>
                   ∞
                 </span>
               </>
             ) : (
               <>
-                <Heart className="w-[22px] h-[22px] text-rose-red fill-current" />
+                <Heart className="w-[22px] h-[22px] text-rose-red fill-current shrink-0" />
                 <span className={`font-extrabold text-rose-red tracking-tight ${textSize}`}>
                   {maxHearts ? `${displayHearts}/${maxHearts}` : displayHearts}
                 </span>
               </>
             )}
-          </HoverStat>
+          </StatPill>
           {!isPro &&
             displayHearts < (maxHearts ?? 5) &&
             regenSeconds !== null &&
