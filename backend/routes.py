@@ -24,7 +24,11 @@ from schemas import (
     StartLessonResponse, AnswerRequest, AnswerResponse, CompleteResponse,
     QuestResponse, UserQuestProgressResponse, UserCourseResponse, EnrollCourseRequest
 )
-from language_registry import get_flag_asset, normalize_language_code
+from quest_progress_utils import (
+    ensure_today_quest_progress,
+    get_or_create_quest_progress,
+    fetch_user_quest_progress_for_day,
+)
 from logic import compute_streak, calculate_regenerated_hearts, should_reset_daily_xp, REGEN_INTERVAL_SECONDS
 from answer_utils import normalize_answer, answer_in_set
 from path_builder import build_course_path
@@ -671,25 +675,14 @@ async def complete_lesson(attempt_id: uuid.UUID, db: AsyncSession = Depends(get_
     all_quests = quests_res.scalars().all()
     
     for quest in all_quests:
-        # Find user's progress for today
-        progress_res = await db.execute(
-            select(UserQuestProgress)
-            .where(UserQuestProgress.user_id == attempt.user_id)
-            .where(UserQuestProgress.quest_id == quest.id)
-            .where(UserQuestProgress.date == today_date)
+        q_progress = await get_or_create_quest_progress(
+            db,
+            attempt.user_id,
+            quest.id,
+            today_date,
+            context="complete_lesson",
         )
-        q_progress = progress_res.scalar_one_or_none()
-        
-        if not q_progress:
-            q_progress = UserQuestProgress(
-                user_id=attempt.user_id,
-                quest_id=quest.id,
-                progress=0,
-                completed=False,
-                date=today_date
-            )
-            db.add(q_progress)
-        
+
         # Increment progress
         if quest.quest_type == "xp":
             q_progress.progress += xp_earned
@@ -703,7 +696,7 @@ async def complete_lesson(attempt_id: uuid.UUID, db: AsyncSession = Depends(get_
     lb_result = await db.execute(
         select(LeaderboardEntry).where(LeaderboardEntry.user_id == attempt.user_id)
     )
-    lb_entry = lb_result.scalar_one_or_none()
+    lb_entry = lb_result.scalars().first()
     if lb_entry:
         lb_entry.weekly_xp += xp_earned
         db.add(lb_entry)
@@ -1006,45 +999,46 @@ async def get_user_profile(user_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/users/{user_id}/quests", response_model=List[UserQuestProgressResponse])
 async def get_user_quests(user_id: str, db: AsyncSession = Depends(get_db)):
-    user = await get_user_or_default(db, user_id)
-    
-    # 1. Fetch all seeded quests
-    quests_res = await db.execute(select(Quest))
-    all_quests = quests_res.scalars().all()
-    
-    # Today's date
-    today_date = datetime.now(timezone.utc).date()
-    
-    # 2. Ensure progress rows exist for today
-    for quest in all_quests:
-        prog_res = await db.execute(
-            select(UserQuestProgress)
-            .where(UserQuestProgress.user_id == user.id)
-            .where(UserQuestProgress.quest_id == quest.id)
-            .where(UserQuestProgress.date == today_date)
+    try:
+        user = await get_user_or_default(db, user_id)
+
+        quests_res = await db.execute(select(Quest))
+        quests_rows = quests_res.scalars().all()
+        all_quests = list(quests_rows)
+
+        today_date = datetime.now(timezone.utc).date()
+
+        await ensure_today_quest_progress(
+            db,
+            user.id,
+            all_quests,
+            today_date,
+            context="get_user_quests",
         )
-        q_progress = prog_res.scalar_one_or_none()
-        
-        if not q_progress:
-            q_progress = UserQuestProgress(
-                user_id=user.id,
-                quest_id=quest.id,
-                progress=0,
-                completed=False,
-                date=today_date
-            )
-            db.add(q_progress)
-            
-    await db.commit()
-    
-    # 3. Fetch all with selectinload to avoid lazy loading issues
-    final_res = await db.execute(
-        select(UserQuestProgress)
-        .where(UserQuestProgress.user_id == user.id)
-        .where(UserQuestProgress.date == today_date)
-        .options(selectinload(UserQuestProgress.quest))
-    )
-    return final_res.scalars().all()
+        await db.commit()
+
+        cleaned = await fetch_user_quest_progress_for_day(
+            db, user.id, today_date
+        )
+        await db.commit()
+
+        quest_lookup = {q.id: q for q in all_quests}
+        for p in cleaned:
+            if p.quest_id in quest_lookup and p.quest is None:
+                p.quest = quest_lookup[p.quest_id]
+
+        return cleaned
+    except Exception as exc:
+        log.exception(
+            "get_user_quests failed for user_id=%s: %s",
+            user_id if "user_id" in locals() else "unknown",
+            exc,
+        )
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+        return []
 
 
 from pydantic import BaseModel
