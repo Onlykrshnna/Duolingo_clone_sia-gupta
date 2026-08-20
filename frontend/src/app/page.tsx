@@ -52,60 +52,103 @@ export default function Home() {
       setLoadingPath(true);
       setError(null);
 
-      const [userStats, coursePath, questsData] = await Promise.all([
-        api.getUserStats("me"),
-        api.getCoursePath(courseId),
-        api.getUserQuests("me"),
+      const [statsResult, pathResult, questsResult] = await Promise.allSettled([
+        api.getUserStats("me", { retries: 2 }),
+        api.getCoursePath(courseId, { retries: 2 }),
+        api.getUserQuests("me", { retries: 1 }),
       ]);
 
-      setStats(userStats);
-      setPathData(coursePath);
-      setActiveCourseId(courseId);
-      setQuestsProgress(questsData);
+      let primaryLoaded = false;
+      if (pathResult.status === "fulfilled" && statsResult.status === "fulfilled") {
+        setStats(statsResult.value);
+        setPathData(pathResult.value);
+        setActiveCourseId(courseId);
+        primaryLoaded = true;
+      }
+
+      if (questsResult.status === "fulfilled") {
+        setQuestsProgress(questsResult.value);
+      } else {
+        console.warn("[Home] quests failed to load, continuing without them", questsResult.reason);
+        setQuestsProgress([]);
+      }
+
+      if (!primaryLoaded) {
+        let firstErr: unknown = null;
+        if (pathResult.status === "rejected") firstErr = pathResult.reason;
+        else if (statsResult.status === "rejected") firstErr = statsResult.reason;
+        console.error("[Home] primary load (courses/path/stats) failed:", firstErr);
+        const friendly =
+          firstErr instanceof ApiError
+            ? firstErr.friendlyMessage
+            : "Unable to reach the server. Please try again in a few seconds.";
+        setError(friendly);
+      }
+
       setLoadingPath(false);
     },
     [setPathData, setStats, setActiveCourseId]
   );
 
   const initialize = useCallback(async () => {
+    setInitializing(true);
+    setError(null);
+
+    let profile: { onboarding_completed?: boolean; active_course_id?: string | null } | null = null;
     try {
-      setInitializing(true);
-      setError(null);
+      profile = await api.getUserProfile("me", { retries: 2 });
+    } catch (err) {
+      console.warn("[Home] profile fetch failed, continuing with best-effort load", err);
+    }
 
-      const profile = await api.getUserProfile("me");
+    if (profile && userNeedsOnboarding(profile)) {
+      if (router.isReady) router.replace("/onboarding");
+      setInitializing(false);
+      return;
+    }
 
-      if (userNeedsOnboarding(profile)) {
-        if (router.isReady) router.replace("/onboarding");
-        return;
-      }
+    let enrolled: unknown[] = [];
+    try {
+      enrolled = await loadEnrolledCourses();
+    } catch (err) {
+      console.error("[Home] enrolled courses failed to load:", err);
+    }
 
-      const enrolled = await loadEnrolledCourses();
+    if (enrolled.length === 0 && profile && !userNeedsOnboarding(profile)) {
+      if (router.isReady) router.replace("/onboarding");
+      setInitializing(false);
+      return;
+    }
+    if (enrolled.length === 0) {
+      const friendly =
+        enrolled === undefined || (enrolled as unknown as ApiError) instanceof ApiError
+          ? (enrolled as unknown as ApiError).friendlyMessage
+          : "Unable to reach the server. Please try again in a few seconds.";
+      setError(friendly);
+      setInitializing(false);
+      setLoadingPath(false);
+      return;
+    }
 
-      if (enrolled.length === 0) {
-        if (router.isReady) router.replace("/onboarding");
-        return;
-      }
+    const anyCourse = enrolled[0] as { course_id: string; is_active?: boolean };
+    const courseId =
+      profile?.active_course_id ??
+      getPersistedActiveCourseId() ??
+      (enrolled.find((c) => (c as { is_active?: boolean }).is_active) as { course_id: string } | undefined)
+        ?.course_id ??
+      anyCourse.course_id;
 
-      const courseId =
-        profile.active_course_id ??
-        getPersistedActiveCourseId() ??
-        enrolled.find((c) => c.is_active)?.course_id ??
-        enrolled[0].course_id;
+    if (!isValidCourseId(courseId)) {
+      setError("No valid course is selected. Please pick a course from onboarding.");
+      setInitializing(false);
+      return;
+    }
 
-      if (!isValidCourseId(courseId)) {
-        setError("No valid course is selected. Please pick a course from onboarding.");
-        return;
-      }
-
-      setActiveCourseId(courseId);
+    setActiveCourseId(courseId);
+    try {
       await loadCourseData(courseId);
     } catch (err: unknown) {
-      console.error("[Home] initialize failed:", err);
-      const friendly =
-        err instanceof ApiError
-          ? err.friendlyMessage
-          : "Failed to connect to the backend server. Make sure FastAPI is running on port 8000 and the database is seeded.";
-      setError(friendly);
+      console.error("[Home] loadCourseData threw unexpectedly:", err);
     } finally {
       setInitializing(false);
       setLoadingPath(false);

@@ -1,5 +1,8 @@
 export const MAX_RETRIES = 3;
 export const RETRY_DELAY_MS = 1000;
+export const REQUEST_TIMEOUT_MS = 15000;
+export const PROD_FALLBACK_API_URL = "https://duolingo-clone-sia-gupta.onrender.com/api/v1";
+export const DEV_API_URL = "http://localhost:8000/api/v1";
 
 export type ApiRequestOptions = RequestInit & {
   retries?: number;
@@ -12,6 +15,7 @@ export class ApiError extends Error {
   readonly status?: number;
   readonly isRetryable: boolean;
   readonly isOffline: boolean;
+  readonly isTimeout: boolean;
 
   constructor(
     message: string,
@@ -21,12 +25,14 @@ export class ApiError extends Error {
       status,
       isRetryable = false,
       isOffline = false,
+      isTimeout = false,
     }: {
       friendlyMessage: string;
       endpoint: string;
       status?: number;
       isRetryable?: boolean;
       isOffline?: boolean;
+      isTimeout?: boolean;
     }
   ) {
     super(message);
@@ -36,10 +42,22 @@ export class ApiError extends Error {
     this.status = status;
     this.isRetryable = isRetryable;
     this.isOffline = isOffline;
+    this.isTimeout = isTimeout;
   }
 }
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const isNodeProd =
+  typeof process !== "undefined" && process.env?.NODE_ENV === "production";
+
+const envUrl = process.env.NEXT_PUBLIC_API_URL;
+
+let BASE_URL: string;
+if (envUrl && envUrl.trim()) {
+  BASE_URL = envUrl.trim();
+} else {
+  BASE_URL = isNodeProd ? PROD_FALLBACK_API_URL : DEV_API_URL;
+}
+
 if (!BASE_URL.includes("/api/v1")) {
   if (BASE_URL.endsWith("/")) {
     BASE_URL = BASE_URL.slice(0, -1);
@@ -80,18 +98,31 @@ export function normalizeApiError(err: unknown, path: string): ApiError {
   }
 
   const message = err instanceof Error ? err.message : String(err);
+  const name = err instanceof Error ? err.name : "";
   const lower = message.toLowerCase();
+
+  if (name === "AbortError" || lower.includes("abort") || lower.includes("timeout")) {
+    return new ApiError(message, {
+      friendlyMessage:
+        "Server is taking longer than expected. Please try again in a few seconds.",
+      endpoint: path,
+      isTimeout: true,
+      isRetryable: true,
+    });
+  }
 
   if (
     lower.includes("failed to fetch") ||
     lower.includes("networkerror") ||
     lower.includes("network request failed") ||
     lower.includes("load failed") ||
-    lower.includes("econnrefused")
+    lower.includes("econnrefused") ||
+    lower.includes("cors")
   ) {
     return new ApiError(message, {
-      friendlyMessage:
-        "Unable to connect to the server. Make sure the backend is running on port 8000.",
+      friendlyMessage: isNodeProd
+        ? "Unable to reach the server. Please try again in a few seconds."
+        : "Unable to connect to the server. Make sure the backend is running on port 8000.",
       endpoint: path,
       isRetryable: true,
     });
@@ -128,6 +159,9 @@ async function requestOnce<T>(path: string, options: RequestInit): Promise<T> {
   const url = `${BASE_URL}${path}`;
   console.debug(`[API] → ${options.method ?? "GET"} ${url}`);
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   let response: Response;
   try {
     response = await fetch(url, {
@@ -136,17 +170,21 @@ async function requestOnce<T>(path: string, options: RequestInit): Promise<T> {
         ...(options.headers ?? {}),
       },
       ...options,
+      signal: controller.signal,
     });
   } catch (err) {
     const apiErr = normalizeApiError(err, path);
-    console.error(`[API] ✗ ${options.method ?? "GET"} ${path} — network error`, {
+    console.error(`[API] ✗ ${options.method ?? "GET"} ${path} — network/timeout error`, {
       endpoint: path,
       url,
       message: apiErr.message,
       friendlyMessage: apiErr.friendlyMessage,
       offline: apiErr.isOffline,
+      timeout: apiErr.isTimeout,
     });
     throw apiErr;
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {

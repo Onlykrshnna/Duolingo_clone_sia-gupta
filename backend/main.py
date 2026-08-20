@@ -36,14 +36,14 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://real-duolingo-frontend.vercel.app",  # Production Vercel placeholder
+    "https://duolingo-clone-sia-gupta.vercel.app",
+    "https://real-duolingo-frontend.vercel.app",
 ]
 
-# Add CORS Middleware (allowing localhost wildcard ports and any Vercel subdomain)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
+    allow_origin_regex=r"https://duolingo-clone-sia-gupta\.vercel\.app|https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

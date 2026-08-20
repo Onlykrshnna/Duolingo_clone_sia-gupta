@@ -87,7 +87,7 @@ export const OnboardingFlow: React.FC = () => {
       const profile = await api.getUserProfile("me");
       if (!profile.onboarding_completed || !profile.active_course_id) {
         throw new Error(
-          "Onboarding was not saved. Restart the backend (uvicorn on port 8000) and try again."
+          "Onboarding was not saved. Please refresh and try again."
         );
       }
 
